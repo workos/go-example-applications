@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="./stylesheets/style.css">
+    </head>
+    <body class="container_success">
+        <div class="logged_in_nav">
+            <div class="flex">
+                <p>You're logged in {{.First_name}} {{.Last_name}}, welcome!</p>
+            </div>
+            <div>
+                <img src="./images/workos_logo_new.png" alt="workos logo">
+            </div>
+        </div>
+        <div class='flex'>
+            <div class="logged_in_div_left">
+                <div>
+                    <h1>Your app,</h1>
+                    <h2>Enterprise Ready</h2>
+                </div>
+                <div>
+                    <a href="https://workos.com/" target="_blank"><button class='button'>WorkOS</button></a>
+                    <a href="https://workos.com/docs" target="_blank"><button class='button'>Documentation</button></a>
+                    <a href="https://workos.com/docs/reference" target="_blank"><button class='button'>API Reference</button></a>
+                    <a href="https://workos.com/blog" target="_blank"><button class='button'>Blog</button></a>
+                    
+                </div>
+            </div>
+            <div class="logged_in_div_right">
+                <div class="flex_column">
+                    <h2>Raw Profile Response Details</h2>
+                    <div class="text_box">
+                        <p>{{.Raw_profile}}</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html>
