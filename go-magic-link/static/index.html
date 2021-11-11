@@ -1,6 +1,6 @@
 <html>
     <head>
-        <link rel="stylesheet" href="../static/login.css">
+        <link rel="stylesheet" href="stylesheets/style.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
     </head>
     <body class="container_login">
@@ -12,8 +12,8 @@
                 </div>
             </div>
             
-            <h2>Python Flask Magic Link Example App</h2>
-            <form method="POST" action="{{ url_for('passwordless_auth') }}">
+            <h2>Go Magic Link Example App</h2>
+            <form method="POST" action="/passwordless-auth">
                 <div class='flex_column'>
                     <div>
                         <input type="text" id="email" name="email" class="text_input">

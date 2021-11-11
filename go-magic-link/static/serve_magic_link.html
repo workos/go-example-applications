@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="stylesheet/login.css">
+    </head>
+    <body class="container_success">
+        <div class="logged_in_nav">
+            <div class="flex">
+                <p>You're on your way to passwordless auth!</p>
+            </div>
+            <div>
+                <img src="../static/images/workos_logo_new.png" alt="workos logo">
+            </div>
+        </div>
+        <div class='flex'>
+            <div class="logged_in_div_left">
+                <div>
+                    <h1>Your app,</h1>
+                    <h2>Enterprise Ready</h2>
+                </div>
+                <div>
+                    <a href="https://workos.com/" target="_blank"><button class='button'>WorkOS</button></a>
+                    <a href="https://workos.com/docs" target="_blank"><button class='button'>Documentation</button></a>
+                    <a href="https://workos.com/docs/reference" target="_blank"><button class='button'>API Reference</button></a>
+                    <a href="https://workos.com/blog" target="_blank"><button class='button'>Blog</button></a>
+                    
+                </div>
+            </div>
+            <div class="logged_in_div_right">
+                <div class="flex_column">
+                    <h2>Here is your Magic Link &#129668;</h2>
+                    <div class="text_box">
+                        <h2>{{email}}</h2>
+                        <a href="{{magic_link}}">{{magic_link}}</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html>
