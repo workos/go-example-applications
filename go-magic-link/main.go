@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/workos-inc/workos-go/pkg/passwordless"
 	"github.com/workos-inc/workos-go/pkg/sso"
@@ -13,20 +12,20 @@ import (
 
 func main() {
 	address := ":8000"
-	apiKey := os.Getenv("WORKOS_API_KEY")
-	clientID := os.Getenv("WORKOS_CLIENT_ID")
-
-	sso.Configure(apiKey, clientID)
+	apiKey := 
+	clientID := 
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+		sso.Configure(apiKey, clientID)
+
 		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
 			Code: r.URL.Query().Get("code"),
 		})
 
 		if err != nil {
-			// Handle the error ...
+			fmt.Println(err)
 		}
 
 		// Use the information in `profile` for further business logic.
@@ -37,16 +36,17 @@ func main() {
 	})
 
 	http.HandleFunc("/passwordless-auth", func(w http.ResponseWriter, r *http.Request) {
-		email := //passed email
+		passwordless.SetAPIKey(apiKey)
 
-			fmt.Println("clicked")
+		email := //email
+
 		session, err := passwordless.CreateSession(context.Background(), passwordless.CreateSessionOpts{
 			Email: email,
 			Type:  passwordless.MagicLink,
 		})
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err, "first")
 		}
 
 		err = passwordless.SendSession(context.Background(), passwordless.SendSessionOpts{
@@ -54,7 +54,7 @@ func main() {
 		})
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err, "second")
 		}
 
 		// Finally, redirect to a "Check your email" page
@@ -65,5 +65,3 @@ func main() {
 	}
 
 }
-
-//change the static for passwordless auth
