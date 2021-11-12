@@ -11,10 +11,15 @@ import (
 	"github.com/workos-inc/workos-go/pkg/sso"
 )
 
+type Profile struct {
+	Email   string
+	Session string
+}
+
 func main() {
 	address := ":8000"
-	apiKey := 
-	clientID := 
+	apiKey := "sk_test_a2V5XzAxRkFLNFJLSzVBUTBSRTNDVFFURFhEQks1LHZwWERmTlUxZUNlUUM0Y1Nrb09LNndpQ3M"
+	clientID := "client_01FAK4RKKMANWZV9XNBRM23B2P"
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
@@ -59,8 +64,10 @@ func main() {
 		if err != nil {
 			fmt.Println(err, "second")
 		}
+
+		this_profile := Profile{email, session.Link}
 		tmpl := template.Must(template.ParseFiles("./static/serve_magic_link.html"))
-		tmpl.Execute(w, email)
+		tmpl.Execute(w, this_profile)
 	})
 
 	if err := http.ListenAndServe(address, nil); err != nil {
