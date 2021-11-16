@@ -16,20 +16,21 @@ type Profile struct {
 	Session string
 }
 
+func Success() {
+	fmt.Println("test")
+}
+
 func main() {
 	address := ":8000"
-	apiKey := 
-	clientID := 
+	apiKey := //apikey
+	clientID := //clientid
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	sso.Configure(apiKey, clientID)
 
-	//http.Handle("/success", http.FileServer(http.Dir("./static/success")))
-
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 
-		sso.Configure(apiKey, clientID)
 		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
 			Code: r.URL.Query().Get("code"),
 		})
