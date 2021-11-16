@@ -18,15 +18,18 @@ type Profile struct {
 
 func main() {
 	address := ":8000"
-	apiKey := "sk_test_a2V5XzAxRkFLNFJLSzVBUTBSRTNDVFFURFhEQks1LHZwWERmTlUxZUNlUUM0Y1Nrb09LNndpQ3M"
-	clientID := "client_01FAK4RKKMANWZV9XNBRM23B2P"
+	apiKey := 
+	clientID := 
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	sso.Configure(apiKey, clientID)
 
+	//http.Handle("/success", http.FileServer(http.Dir("./static/success")))
+
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 
+		sso.Configure(apiKey, clientID)
 		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
 			Code: r.URL.Query().Get("code"),
 		})
@@ -38,8 +41,6 @@ func main() {
 		// Use the information in `profile` for further business logic.
 		profile := profileAndToken.Profile
 		fmt.Println(profile)
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	http.HandleFunc("/passwordless-auth", func(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +55,7 @@ func main() {
 		})
 
 		if err != nil {
-			fmt.Println(err, "first")
+			fmt.Println(err)
 		}
 
 		err = passwordless.SendSession(context.Background(), passwordless.SendSessionOpts{
@@ -62,7 +63,7 @@ func main() {
 		})
 
 		if err != nil {
-			fmt.Println(err, "second")
+			fmt.Println(err)
 		}
 
 		this_profile := Profile{email, session.Link}
