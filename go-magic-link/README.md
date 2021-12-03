@@ -24,7 +24,7 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
 
 3. Navigate to the cloned repo and to the admin portal:
    ```bash
-   $ cd Go-Example-Applications/go-admin-portal
+   $ cd Go-Example-Applications/go-magic-link
    ```
 
 4. Obtain and make note of the following values. In the next step, these will be set as environment variables.
