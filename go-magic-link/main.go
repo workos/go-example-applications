@@ -20,7 +20,6 @@ type Profile struct {
 func main() {
 	address := ":8000"
 	apiKey := ""
-	clientID := ""
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
@@ -54,7 +53,7 @@ func main() {
 		tmpl.Execute(w, this_profile)
 	})
 
-	http.HandleFunc("/success.html", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
 		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
 			Code: r.URL.Query().Get("code"),
 		})
