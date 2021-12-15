@@ -24,7 +24,7 @@ func main() {
 		APIKey      string
 		ClientID    string
 		RedirectURI string
-		Domain      string
+		Connection  string
 		Provider    string
 	}
 
@@ -38,7 +38,7 @@ func main() {
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.ClientID, "client-id", os.Getenv("WORKOS_CLIENT_ID"), "The WorkOS client id.")
 	flag.StringVar(&conf.RedirectURI, "redirect-uri", os.Getenv("WORKOS_REDIRECT_URI"), "The redirect uri.")
-	flag.StringVar(&conf.Domain, "domain", os.Getenv("WORKOS_DOMAIN"), "The domain used to register a WorkOS SSO connection.")
+	flag.StringVar(&conf.Connection, "connection", os.Getenv("WORKOS_CONNECTION"), "Use the Connection ID associated to your SSO Connection..")
 	flag.StringVar(&conf.Provider, "provider", "", "The OAuth provider used for the SSO connection.")
 	flag.Parse()
 
@@ -51,8 +51,7 @@ func main() {
 
 	// Handle login
 	http.Handle("/login", sso.Login(sso.GetAuthorizationURLOptions{
-		//Instead of domain, you can now use connection ID to associate a user to the appropriate connection.
-		Domain:      conf.Domain,
+		Connection:  conf.Connection,
 		RedirectURI: conf.RedirectURI,
 	}))
 
