@@ -39,7 +39,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
    - WORKOS_API_KEY=xxx
    - WORKOS_CLIENT_ID=xxx
    - WORKOS_REDIRECT_URI=xxx
-   - WORKOS_DOMAIN=xxx
+   - WORKOS_CONNECTION=xxx
 
 6. The final setup step is to start the server.
    ```bash
