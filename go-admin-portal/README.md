@@ -4,12 +4,7 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
 
 ## Go Project Setup
 
-1. In your CLI, navigate to the directory into which you want to clone this git repo.
-   ```bash
-   $ cd ~/Desktop/
-   ```
-
-2. Clone the example repo using your preferred secure method (HTTPS or SSH).
+1. Clone the example repo using your preferred secure method (HTTPS or SSH).
    ```bash
    # HTTPS
    $ git clone https://github.com/workos-inc/Go-Example-Applications.git
@@ -22,19 +17,19 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
    $ git clone git@github.com:workos-inc/Go-Example-Applications.git
    ```
 
-3. Navigate to the cloned repo and to the admin portal:
+2. Navigate to the cloned repo and to the admin portal:
    ```bash
    $ cd Go-Example-Applications/go-admin-portal
    ```
 
-4. Obtain and make note of the following values. In the next step, these will be set as environment variables.
+3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
 
-5. Add this to your APIKey variable.
+4. Add this to your APIKey variable.
 
 ## Start the server
 
-11. The final setup step is to start the server.
+5. The final setup step is to start the server.
    ```bash
    go run main.go
    ```
