@@ -4,14 +4,35 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/workos-inc/workos-go/pkg/directorysync"
+	"github.com/workos-inc/workos-go/pkg/webhooks"
 )
+
+func handleWebhook(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+	}
+	bodyString := string(body)
+	hooks := webhooks.NewClient(os.Getenv("WORKOS_WEBHOOK_SECRET"))
+	hook, err := hooks.ValidatePayload(r.Header.Get("Workos-Signature"), bodyString)
+	fmt.Println("WORKOS WEBHOOKS")
+	if err != nil {
+		fmt.Println("Errors found:")
+		fmt.Println(err)
+	} else {
+		fmt.Println("Webhook Succesfully Validated:")
+		fmt.Println(hook)
+	}
+}
 
 func main() {
 	err := godotenv.Load()
@@ -71,6 +92,9 @@ func main() {
 		// Render the template with the users as data
 		tmpl.Execute(w, data)
 	})
+
+	// Handle  webhooks
+	http.HandleFunc("/webhooks", handleWebhook)
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
