@@ -9,9 +9,45 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/workos-inc/workos-go/pkg/sso"
 )
+
+var (
+	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	key    = []byte("super-secret-key")
+	store  = sessions.NewCookieStore(key)
+	router = http.NewServeMux()
+)
+
+type Profile struct {
+	First_name  string
+	Last_name   string
+	Raw_profile string
+}
+
+func signin(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "cookie-name")
+
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+		return
+	}
+
+	// Redirect to Profile if Logged in
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "cookie-name")
+
+	// Revoke users authentication
+	session.Values["authenticated"] = false
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
 
 func main() {
 	err := godotenv.Load()
@@ -28,12 +64,6 @@ func main() {
 		Provider    string
 	}
 
-	type Profile struct {
-		First_name  string
-		Last_name   string
-		Raw_profile string
-	}
-
 	flag.StringVar(&conf.Addr, "addr", ":3042", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.ClientID, "client-id", os.Getenv("WORKOS_CLIENT_ID"), "The WorkOS client id.")
@@ -44,20 +74,19 @@ func main() {
 
 	log.Printf("launching sso demo with configuration: %+v", conf)
 
-	http.Handle("/", http.FileServer(http.Dir("./static")))
-
 	// Configure the WorkOS SSO SDK:
 	sso.Configure(conf.APIKey, conf.ClientID)
 
 	// Handle login
-	http.Handle("/login", sso.Login(sso.GetAuthorizationURLOptions{
+	router.Handle("/login", sso.Login(sso.GetAuthorizationURLOptions{
 		Connection:  conf.Connection,
 		RedirectURI: conf.RedirectURI,
 	}))
 
 	// Handle login redirect:
 	tmpl := template.Must(template.ParseFiles("./static/logged_in.html"))
-	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+
 		log.Printf("callback is called with %s", r.URL)
 
 		// Retrieving user profile:
@@ -71,6 +100,9 @@ func main() {
 			w.Write([]byte(err.Error()))
 			return
 		}
+		session, _ := store.Get(r, "cookie-name")
+		session.Values["authenticated"] = true
+		session.Save(r, w)
 
 		// Display user profile:
 		b, err := json.MarshalIndent(profile, "", "    ")
@@ -104,7 +136,11 @@ func main() {
 		tmpl.Execute(w, this_profile)
 	})
 
-	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
-		log.Panic(err)
-	}
+	// Handle routes:
+	fileServer := http.FileServer(http.Dir("/Static"))
+	router.HandleFunc("/", signin)
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	router.HandleFunc("/logout", logout)
+	router.Handle("/signin/", http.StripPrefix("/signin", fileServer))
+	http.ListenAndServe(conf.Addr, router)
 }
