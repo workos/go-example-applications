@@ -1,6 +1,6 @@
 <html>
     <head>
-        <link rel="stylesheet" href="./stylesheets/style.css">
+        <link rel="stylesheet" href="./static/stylesheets/style.css">
     </head>
     <body class="container_success">
         <div class="logged_in_nav">
@@ -8,7 +8,7 @@
                 <p>You're logged in {{.First_name}} {{.Last_name}}, welcome!</p>
             </div>
             <div>
-                <img src="./images/workos_logo_new.png" alt="workos logo">
+                <img src="./static/images/workos_logo_new.png" alt="workos logo">
             </div>
         </div>
         <div class='flex'>
@@ -31,6 +31,7 @@
                     <div class="text_box">
                         <p>{{.Raw_profile}}</p>
                     </div>
+                    <a href="/logout"><button class="button">Log Out</button></a>
                 </div>
 
             </div>
