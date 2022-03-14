@@ -1,5 +1,5 @@
 # go-sso-example
-An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos-inc/workos-go) to authenticate users via SSO.
+An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) to authenticate users via SSO.
 
 ## Prerequisites
 - Go

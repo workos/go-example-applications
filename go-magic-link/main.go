@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/workos-inc/workos-go/pkg/passwordless"
-	"github.com/workos-inc/workos-go/pkg/sso"
+	"github.com/workos/workos-go/pkg/passwordless"
+	"github.com/workos/workos-go/pkg/sso"
 )
 
 type Profile struct {

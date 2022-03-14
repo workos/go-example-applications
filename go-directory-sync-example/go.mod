@@ -5,7 +5,7 @@ go 1.16
 
 require (
 	github.com/joho/godotenv v1.4.0
-	github.com/workos-inc/workos-go v1.7.0
+	github.com/workos/workos-go v1.7.0
 )
 
 

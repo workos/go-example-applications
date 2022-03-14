@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
-	"github.com/workos-inc/workos-go/pkg/sso"
+	"github.com/workos/workos-go/pkg/sso"
 )
 
 var (
