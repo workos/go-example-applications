@@ -1,5 +1,5 @@
 # go-directory-sync-example
-An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos-inc/workos-go) for directory sync.
+An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) for directory sync.
 
 ## Prerequisites
 - Go
