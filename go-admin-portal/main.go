@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/workos-inc/workos-go/pkg/organizations"
-	"github.com/workos-inc/workos-go/pkg/portal"
+	"github.com/workos/workos-go/pkg/organizations"
+	"github.com/workos/workos-go/pkg/portal"
 )
 
 func main() {

@@ -1,6 +1,6 @@
 # Go Example Appplications powered by WorkOS
 
-Example applications demonstrating to use the [WorkOS Go SDK](https://github.com/workos-inc/workos-go) for SSO, Directory Sync, Admin Portal and Magic Link.
+Example applications demonstrating to use the [WorkOS Go SDK](https://github.com/workos/workos-go) for SSO, Directory Sync, Admin Portal and Magic Link.
 
 ## For more information, please see the following guides:
 

@@ -12,8 +12,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/workos-inc/workos-go/pkg/directorysync"
-	"github.com/workos-inc/workos-go/pkg/webhooks"
+	"github.com/workos/workos-go/pkg/directorysync"
+	"github.com/workos/workos-go/pkg/webhooks"
 )
 
 func handleWebhook(w http.ResponseWriter, r *http.Request) {

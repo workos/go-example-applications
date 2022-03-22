@@ -6,5 +6,5 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
-	github.com/workos-inc/workos-go v1.3.0
+	github.com/workos/workos-go v1.3.0
 )

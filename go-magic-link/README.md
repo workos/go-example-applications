@@ -1,5 +1,5 @@
 # Go-admin-portal-example
-An example Golang application demonstrating how to use the [WorkOS Golang SDK](https://github.com/workos-inc/workos-go) so your customers can access the WorkOS Admin Portal from your application.
+An example Golang application demonstrating how to use the [WorkOS Golang SDK](https://github.com/workos/workos-go) so your customers can access the WorkOS Admin Portal from your application.
 
 
 ## Go Project Setup
