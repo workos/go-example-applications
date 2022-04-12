@@ -36,27 +36,36 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
-	enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
-		Type:       "totp",
-		TotpIssuer: "WorkOS",
-		TotpUser:   "some_user",
+	http.HandleFunc("/enroll-factor", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		enrolltype := r.FormValue("type")
+		totpissuer := r.FormValue("totp_issuer")
+		totpuser := r.FormValue("totp_user")
+		number := r.FormValue("phone_number")
+
+		fmt.Println(enrolltype)
+
+		enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
+			Type:        enrolltype,
+			TotpIssuer:  totpissuer,
+			TotpUser:    totpuser,
+			PhoneNumber: number,
+		})
+		if err != nil {
+			log.Printf("enroll factor failed: %s", err)
+			return
+		}
+
+		b, err := json.MarshalIndent(enroll, "", "    ")
+		if err != nil {
+			log.Printf("error: %s", err)
+		}
+
+		stringB := string(b)
+		data := Users{stringB}
+
+		fmt.Println(data)
 	})
-	if err != nil {
-		log.Printf("enroll factor failed: %s", err)
-		return
-	}
-
-	b, err := json.MarshalIndent(enroll, "", "    ")
-	if err != nil {
-		log.Printf("error: %s", err)
-	}
-
-	// Stringify the returned users
-	stringB := string(b)
-	data := Users{stringB}
-
-	// Render the template with the users as data
-	fmt.Println(data)
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
