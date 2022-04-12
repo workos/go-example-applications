@@ -22,6 +22,14 @@ body {
   bottom: 10px;
 }
 
+.card {
+  border: 1px solid #555555;
+  border-radius: 10px;
+  margin: 0px 15px 0px 15px;
+  padding: 25px 50px;
+  margin-bottom: 20px;
+}
+
 .flex {
   display: flex;
   justify-content: center;
@@ -32,6 +40,26 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.space_evenly {
+  justify-content: space-evenly;
+}
+
+.space_between {
+  justify-content: space-between;
+}
+
+.width_40vw {
+  width: 40vw;
+}
+
+.width_10vw {
+  width: 10vw;
+}
+
+.mt-20 {
+  margin-top: 20px !important;
 }
 
 .container_success {
@@ -74,6 +102,16 @@ body {
   cursor: pointer;
 }
 
+.button-outline {
+  background-color: white;
+  color: rgb(46, 46, 46);
+}
+
+.button-sm {
+  padding: 8px 16px;
+  margin-top:14px
+}
+
 .button:hover {
   background-color: #555555;
   border: 2px solid #555555;
@@ -81,7 +119,7 @@ body {
 }
 
 .login_button {
-  width: 95%;
+  width: 40vw;
 }
 
 h2, h1 {
@@ -91,13 +129,15 @@ h2, h1 {
 
 .logged_in_div_right {
   width: 60%;
-  height: 100vh;
+  height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
+  position: relative;
+  bottom: 10%;
 
+}
 .logged_in_div_left {
   width: 40%;
   height: 100vh;
@@ -140,11 +180,9 @@ div.text_box {
   background-color: #dad8d8;
   border-radius: 5px;
   border: 2px solid #6363f1;
-  width: 45vw;
+  width: 75%;
   padding: 10px;
   word-wrap: break-word;
-  height: 500px;
-  overflow: scroll;
 }
 
 .logged_in_nav {
@@ -168,4 +206,40 @@ div.text_box {
 
 .logged_in_nav img:hover {
   border: 2px solid #555555;
+}
+
+.text_input {
+  border: 1px solid #555555;
+  border-radius: 10px;
+  margin: 20px 0px 7px 0px;
+  padding: 5px;
+  height: 35px;
+  width: 18vw;
+  text-align: center;
+}
+
+.factor_card {
+  border: 1px solid #555555;
+  border-radius: 10px;
+  width: 20vw;
+  margin: 0px 15px 0px 15px;
+  padding: 25px;
+}
+
+.card {
+  border: 1px solid #555555;
+  border-radius: 10px;
+  margin: 0px 15px 0px 15px;
+  padding: 25px 50px;
+  margin-bottom: 20px;
+}
+
+.qr_div {
+  align-self: center;
+  padding-top: 15px;
+}
+
+.qr_code {
+  width: 7vw; 
+  max-width: 100px;
 }

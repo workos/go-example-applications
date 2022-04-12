@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -20,6 +21,7 @@ func main() {
 
 	var conf struct {
 		APIKey string
+		Addr   string
 	}
 
 	type Users struct {
@@ -27,9 +29,12 @@ func main() {
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
+	flag.StringVar(&conf.Addr, "addr", ":8002", "The server addr.")
 	flag.Parse()
 
-	mfa.SetAPIKey("sk_test_a2V5XzAxRkFLNFJLSzVBUTBSRTNDVFFURFhEQks1LHZwWERmTlUxZUNlUUM0Y1Nrb09LNndpQ3M")
+	mfa.SetAPIKey(conf.APIKey)
+
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
 		Type:       "totp",
@@ -52,5 +57,9 @@ func main() {
 
 	// Render the template with the users as data
 	fmt.Println(data)
+
+	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
+		log.Panic(err)
+	}
 
 }
