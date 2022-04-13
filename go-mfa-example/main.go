@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -24,8 +23,9 @@ func main() {
 		Addr   string
 	}
 
-	type Users struct {
-		Users string
+	type Response struct {
+		ID   string `json:"id"`
+		Type string `json:"type"`
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
@@ -43,8 +43,6 @@ func main() {
 		totpuser := r.FormValue("totp_user")
 		number := r.FormValue("phone_number")
 
-		fmt.Println(enrolltype)
-
 		enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
 			Type:        enrolltype,
 			TotpIssuer:  totpissuer,
@@ -56,15 +54,10 @@ func main() {
 			return
 		}
 
-		b, err := json.MarshalIndent(enroll, "", "    ")
-		if err != nil {
-			log.Printf("error: %s", err)
-		}
+		this_response := Response{enroll.Type, enroll.ID}
+		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
+		tmpl.Execute(w, this_response)
 
-		stringB := string(b)
-		data := Users{stringB}
-
-		fmt.Println(data)
 	})
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
