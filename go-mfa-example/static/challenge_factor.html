@@ -30,34 +30,27 @@
         </div>
         <div class="logged_in_div_right">
             <div class="flex_column">
-                <div class="flex space_between width_40vw">
+                <div class="flex-column">
                     <div>
-                        <h2>Current MFA Factors</h2>
+                        <form method="POST" action="{{ url_for('verify_factor') }}">
+                            <div class='flex_column'>
+                                <div>
+                                    <input type="text" id="code" name="code" class="text_input"
+                                        placeholder="Input Auth Code">
+                                </div>
+                                <div>
+                                    <button type="submit" class="button">Verify Factor</button>
+                                </div>
+                            </div>
+                        </form>
+
                     </div>
-
-                    <div class="flex space-between">
-                        <a href="/enroll_factor_details">
-                            <button class="button button-outline button-sm">Enroll New Factor</button>
-                        </a>
-                        <a href="/clear_session">
-                            <button class="button button-outline button-sm">Clear Factors</button>
-                        </a>
-                    </div>
-
                 </div>
-            </div>
 
-            <div class="flex-column">
-                <div>
-                    <a class="button login_button" action="/factor_detail" href="/factor-detail?id={{.ID}}">{{.ID}} || {{.Type}}</a>
-                </div>
             </div>
 
         </div>
-
     </div>
-    </div>
-
 </body>
 
 </html>

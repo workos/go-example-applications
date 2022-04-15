@@ -24,8 +24,11 @@ func main() {
 	}
 
 	type Response struct {
-		ID   string `json:"id"`
-		Type string `json:"type"`
+		ID          string `json:"id"`
+		Type        string `json:"type"`
+		Environment string `json:"environment_id`
+		CreatedAt   string `json:"created_at"`
+		UpdatedAt   string `json:"updated_at"`
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
@@ -54,9 +57,15 @@ func main() {
 			return
 		}
 
-		this_response := Response{enroll.Type, enroll.ID}
+		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt}
 		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
 		tmpl.Execute(w, this_response)
+
+		http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
+			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID}
+			tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
+			tmpl.Execute(w, this_response)
+		})
 
 	})
 

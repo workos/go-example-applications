@@ -30,34 +30,21 @@
         </div>
         <div class="logged_in_div_right">
             <div class="flex_column">
-                <div class="flex space_between width_40vw">
-                    <div>
-                        <h2>Current MFA Factors</h2>
+                <div class="flex-column">
+                    <div class="card">
+                        <h1>User Verified: {{valid}}</h1>
+                        <p>Factor ID: {{challenge['authentication_factor_id']}}</p>
+                        <p>Created At: {{challenge['created_at']}}</p>
+                        {%if type == 'sms'%}
+                        <p>Expires At: {{challenge['expires_at']}}</p>
+                        {% endif %}
                     </div>
-
-                    <div class="flex space-between">
-                        <a href="/enroll_factor_details">
-                            <button class="button button-outline button-sm">Enroll New Factor</button>
-                        </a>
-                        <a href="/clear_session">
-                            <button class="button button-outline button-sm">Clear Factors</button>
-                        </a>
-                    </div>
-
                 </div>
-            </div>
-
-            <div class="flex-column">
-                <div>
-                    <a class="button login_button" action="/factor_detail" href="/factor-detail?id={{.ID}}">{{.ID}} || {{.Type}}</a>
-                </div>
+                <a href="/"><button class='button'>Go Back Home</button></a>
             </div>
 
         </div>
-
     </div>
-    </div>
-
 </body>
 
 </html>
