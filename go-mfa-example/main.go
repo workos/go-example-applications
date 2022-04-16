@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -29,6 +30,7 @@ func main() {
 		Environment string `json:"environment_id`
 		CreatedAt   string `json:"created_at"`
 		UpdatedAt   string `json:"updated_at"`
+		Phone       interface{}
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
@@ -57,14 +59,33 @@ func main() {
 			return
 		}
 
-		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt}
+		SmsDetails := enroll.Sms
+		fmt.Println(SmsDetails["phone_number"])
+
+		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"]}
 		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
 		tmpl.Execute(w, this_response)
 
 		http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
-			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID}
+			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"]}
 			tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 			tmpl.Execute(w, this_response)
+		})
+
+		http.HandleFunc("/challenge-factor", func(w http.ResponseWriter, r *http.Request) {
+			smstemplate := r.FormValue("sms_message")
+
+			challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
+				AuthenticationFactorID: enroll.ID,
+				SMSTemplate:            smstemplate,
+			})
+
+			if err != nil {
+				log.Printf("challengefailed: %s", err)
+				return
+			}
+
+			fmt.Println(challenge)
 		})
 
 	})

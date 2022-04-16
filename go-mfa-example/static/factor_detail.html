@@ -40,6 +40,7 @@
                             <p>Environment: <code>{{.Environment}}</code></p>
                             <p>Created At: <code>{{.CreatedAt}}</code></p>
                             <p>Updated At: <code>{{.UpdatedAt}}</code></p>
+                            <p>Phone: <code>{{.Phone}}</code></p>
                         </div>
                     </div>
                     <div class="qr_div">
@@ -50,7 +51,7 @@
 
                 <div class="flex-column">
                     <div>
-                        <form method="POST" action="">
+                        <form method="POST" action="/challenge-factor">
                             <div class='flex_column'>
                                 <div>
                                     <input type="text" id="sms_message" name="sms_message" class="text_input"
