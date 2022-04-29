@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -30,6 +31,7 @@ func main() {
 		CreatedAt   string `json:"created_at"`
 		UpdatedAt   string `json:"updated_at"`
 		Phone       interface{}
+		Totp        interface{}
 	}
 
 	type VerifyResponse struct {
@@ -64,13 +66,14 @@ func main() {
 		}
 
 		SmsDetails := enroll.Sms
+		qrCode := fmt.Sprint(enroll.Totp["qr_code"])
 
-		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"]}
+		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
 		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
 		tmpl.Execute(w, this_response)
 
 		http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
-			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"]}
+			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
 			tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 			tmpl.Execute(w, this_response)
 		})

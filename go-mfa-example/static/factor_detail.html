@@ -40,12 +40,15 @@
                             <p>Environment: <code>{{.Environment}}</code></p>
                             <p>Created At: <code>{{.CreatedAt}}</code></p>
                             <p>Updated At: <code>{{.UpdatedAt}}</code></p>
-                            <p>Phone: <code>{{.Phone}}</code></p>
+                            <p>Phone Number: <code>{{.Phone}}</code></p>
                         </div>
                     </div>
+                    {{if .Phone}}
+                    {{ else }}
                     <div class="qr_div">
-                        <img class="qr_code" src="qr_code" alt="qr_code">
+                        <img class="qr_code" src={{.Totp}} alt="qr_code">
                     </div>
+                    {{ end }}
 
                 </div>
 
@@ -53,10 +56,12 @@
                     <div>
                         <form method="POST" action="/challenge-factor">
                             <div class='flex_column'>
+                                {{if .Phone }}
                                 <div>
                                     <input type="text" id="sms_message" name="sms_message" class="text_input"
                                         placeholder="Custom SMS Message Input code">
                                 </div>
+                                {{end}}
                                 <div>
                                     <button type="submit" class="button">Challenge Factor</button>
                                 </div>
