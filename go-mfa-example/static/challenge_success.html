@@ -32,12 +32,8 @@
             <div class="flex_column">
                 <div class="flex-column">
                     <div class="card">
-                        <h1>User Verified: {{valid}}</h1>
-                        <p>Factor ID: {{challenge['authentication_factor_id']}}</p>
-                        <p>Created At: {{challenge['created_at']}}</p>
-                        {%if type == 'sms'%}
-                        <p>Expires At: {{challenge['expires_at']}}</p>
-                        {% endif %}
+                        <h1>User Verified: {{.Valid}}</h1>
+                        <p>{{.Challenge}}</p>
                     </div>
                 </div>
                 <a href="/"><button class='button'>Go Back Home</button></a>

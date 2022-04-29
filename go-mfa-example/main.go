@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -33,6 +32,11 @@ func main() {
 		Phone       interface{}
 	}
 
+	type VerifyResponse struct {
+		Valid     bool `json:"valid"`
+		Challenge interface{}
+	}
+
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Addr, "addr", ":8002", "The server addr.")
 	flag.Parse()
@@ -60,7 +64,6 @@ func main() {
 		}
 
 		SmsDetails := enroll.Sms
-		fmt.Println(SmsDetails["phone_number"])
 
 		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"]}
 		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
@@ -85,7 +88,28 @@ func main() {
 				return
 			}
 
-			fmt.Println(challenge)
+			tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
+			tmpl.Execute(w, "")
+
+			http.HandleFunc("/verify-factor", func(w http.ResponseWriter, r *http.Request) {
+				code := r.FormValue("code")
+
+				verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
+					AuthenticationChallengeID: challenge.ID,
+					Code:                      code,
+				})
+
+				if err != nil {
+					log.Printf("challengefailed: %s", err)
+					return
+				}
+
+				valid := verify.(mfa.VerifyResponse).Valid
+				challenge := verify.(mfa.VerifyResponse).Challenge
+				tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
+				this_response := VerifyResponse{valid, challenge}
+				tmpl.Execute(w, this_response)
+			})
 		})
 
 	})
