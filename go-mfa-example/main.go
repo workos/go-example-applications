@@ -13,30 +13,30 @@ import (
 	"github.com/workos/workos-go/pkg/mfa"
 )
 
+var conf struct {
+	APIKey string
+	Addr   string
+}
+
+type Response struct {
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	Environment string `json:"environment_id`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	Phone       interface{}
+	Totp        interface{}
+}
+
+type VerifyResponse struct {
+	Valid     bool `json:"valid"`
+	Challenge interface{}
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
-	}
-
-	var conf struct {
-		APIKey string
-		Addr   string
-	}
-
-	type Response struct {
-		ID          string `json:"id"`
-		Type        string `json:"type"`
-		Environment string `json:"environment_id`
-		CreatedAt   string `json:"created_at"`
-		UpdatedAt   string `json:"updated_at"`
-		Phone       interface{}
-		Totp        interface{}
-	}
-
-	type VerifyResponse struct {
-		Valid     bool `json:"valid"`
-		Challenge interface{}
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
