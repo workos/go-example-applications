@@ -33,6 +33,83 @@ type VerifyResponse struct {
 	Challenge interface{}
 }
 
+func enrollHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	enrolltype := r.FormValue("type")
+	totpissuer := r.FormValue("totp_issuer")
+	totpuser := r.FormValue("totp_user")
+	number := r.FormValue("phone_number")
+
+	enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
+		Type:        enrolltype,
+		TotpIssuer:  totpissuer,
+		TotpUser:    totpuser,
+		PhoneNumber: number,
+	})
+	if err != nil {
+		log.Printf("enroll factor failed: %s", err)
+		return
+	}
+
+	SmsDetails := enroll.Sms
+	qrCode := fmt.Sprint(enroll.Totp["qr_code"])
+
+	this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
+	tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
+	tmpl.Execute(w, this_response)
+
+	http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
+		this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
+		tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
+		tmpl.Execute(w, this_response)
+	})
+
+	http.HandleFunc("/challenge-factor", challengeFactorHandler(enroll.ID))
+}
+
+func challengeFactorHandler(enrollId string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		smstemplate := r.FormValue("sms_message")
+
+		challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
+			AuthenticationFactorID: enrollId,
+			SMSTemplate:            smstemplate,
+		})
+
+		if err != nil {
+			log.Printf("challengefailed: %s", err)
+			return
+		}
+
+		tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
+		tmpl.Execute(w, "")
+
+		http.HandleFunc("/verify-factor", verifyFactorHandler(challenge.ID))
+	}
+}
+
+func verifyFactorHandler(challengeId string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := r.FormValue("code")
+
+		verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
+			AuthenticationChallengeID: challengeId,
+			Code:                      code,
+		})
+
+		if err != nil {
+			log.Printf("challengefailed: %s", err)
+			return
+		}
+
+		valid := verify.(mfa.VerifyResponse).Valid
+		challenge := verify.(mfa.VerifyResponse).Challenge
+		tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
+		this_response := VerifyResponse{valid, challenge}
+		tmpl.Execute(w, this_response)
+	}
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -47,75 +124,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
-	http.HandleFunc("/enroll-factor", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
-		enrolltype := r.FormValue("type")
-		totpissuer := r.FormValue("totp_issuer")
-		totpuser := r.FormValue("totp_user")
-		number := r.FormValue("phone_number")
-
-		enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
-			Type:        enrolltype,
-			TotpIssuer:  totpissuer,
-			TotpUser:    totpuser,
-			PhoneNumber: number,
-		})
-		if err != nil {
-			log.Printf("enroll factor failed: %s", err)
-			return
-		}
-
-		SmsDetails := enroll.Sms
-		qrCode := fmt.Sprint(enroll.Totp["qr_code"])
-
-		this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
-		tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
-		tmpl.Execute(w, this_response)
-
-		http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
-			this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
-			tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
-			tmpl.Execute(w, this_response)
-		})
-
-		http.HandleFunc("/challenge-factor", func(w http.ResponseWriter, r *http.Request) {
-			smstemplate := r.FormValue("sms_message")
-
-			challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
-				AuthenticationFactorID: enroll.ID,
-				SMSTemplate:            smstemplate,
-			})
-
-			if err != nil {
-				log.Printf("challengefailed: %s", err)
-				return
-			}
-
-			tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
-			tmpl.Execute(w, "")
-
-			http.HandleFunc("/verify-factor", func(w http.ResponseWriter, r *http.Request) {
-				code := r.FormValue("code")
-
-				verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
-					AuthenticationChallengeID: challenge.ID,
-					Code:                      code,
-				})
-
-				if err != nil {
-					log.Printf("challengefailed: %s", err)
-					return
-				}
-
-				valid := verify.(mfa.VerifyResponse).Valid
-				challenge := verify.(mfa.VerifyResponse).Challenge
-				tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
-				this_response := VerifyResponse{valid, challenge}
-				tmpl.Execute(w, this_response)
-			})
-		})
-
-	})
+	http.HandleFunc("/enroll-factor", enrollHandler)
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
