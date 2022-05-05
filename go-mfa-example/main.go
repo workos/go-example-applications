@@ -71,15 +71,9 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		Value: "your_token",
 	})
 
-	this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
-	tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
+	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
+	tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 	tmpl.Execute(w, this_response)
-
-	router.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
-		this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
-		tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
-		tmpl.Execute(w, this_response)
-	})
 }
 
 func challengeFactor(w http.ResponseWriter, r *http.Request) {
