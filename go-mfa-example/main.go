@@ -13,6 +13,14 @@ import (
 	"github.com/workos/workos-go/pkg/mfa"
 )
 
+var sessions = map[string]session{}
+var router = http.NewServeMux()
+
+type session struct {
+	enrollID    string
+	challengeID string
+}
+
 var conf struct {
 	APIKey string
 	Addr   string
@@ -54,60 +62,66 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 	SmsDetails := enroll.Sms
 	qrCode := fmt.Sprint(enroll.Totp["qr_code"])
 
+	sessions["your_token"] = session{
+		enrollID: enroll.ID,
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session_token",
+		Value: "your_token",
+	})
+
 	this_response := Response{enroll.ID, enroll.Type, enroll.EnvironmentID, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
 	tmpl := template.Must(template.ParseFiles("./static/enroll_factor.html"))
 	tmpl.Execute(w, this_response)
 
-	http.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/factor-detail", func(w http.ResponseWriter, r *http.Request) {
 		this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
 		tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 		tmpl.Execute(w, this_response)
 	})
-
-	http.HandleFunc("/challenge-factor", challengeFactorHandler(enroll.ID))
 }
 
-func challengeFactorHandler(enrollId string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		smstemplate := r.FormValue("sms_message")
+func challengeFactor(w http.ResponseWriter, r *http.Request) {
 
-		challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
-			AuthenticationFactorID: enrollId,
-			SMSTemplate:            smstemplate,
-		})
+	smstemplate := r.FormValue("sms_message")
 
-		if err != nil {
-			log.Printf("challengefailed: %s", err)
-			return
-		}
+	challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
+		AuthenticationFactorID: sessions["your_token"].enrollID,
+		SMSTemplate:            smstemplate,
+	})
 
-		tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
-		tmpl.Execute(w, "")
-
-		http.HandleFunc("/verify-factor", verifyFactorHandler(challenge.ID))
+	if err != nil {
+		log.Printf("challengefailed: %s", err)
+		return
 	}
+
+	sessions["your_token"] = session{
+		challengeID: challenge.ID,
+	}
+
+	tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
+	tmpl.Execute(w, "")
 }
 
-func verifyFactorHandler(challengeId string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		code := r.FormValue("code")
+func verifyFactor(w http.ResponseWriter, r *http.Request) {
+	code := r.FormValue("code")
 
-		verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
-			AuthenticationChallengeID: challengeId,
-			Code:                      code,
-		})
+	verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
+		AuthenticationChallengeID: sessions["your_token"].challengeID,
+		Code:                      code,
+	})
 
-		if err != nil {
-			log.Printf("challengefailed: %s", err)
-			return
-		}
-
-		valid := verify.(mfa.VerifyResponse).Valid
-		challenge := verify.(mfa.VerifyResponse).Challenge
-		tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
-		this_response := VerifyResponse{valid, challenge}
-		tmpl.Execute(w, this_response)
+	if err != nil {
+		log.Printf("challengefailed: %s", err)
+		return
 	}
+
+	valid := verify.(mfa.VerifyResponse).Valid
+	challenge := verify.(mfa.VerifyResponse).Challenge
+	tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
+	this_response := VerifyResponse{valid, challenge}
+	tmpl.Execute(w, this_response)
 }
 
 func main() {
@@ -122,12 +136,10 @@ func main() {
 
 	mfa.SetAPIKey(conf.APIKey)
 
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	router.Handle("/", http.FileServer(http.Dir("./static")))
+	router.HandleFunc("/enroll-factor", enrollHandler)
+	router.HandleFunc("/challenge-factor", challengeFactor)
+	router.HandleFunc("/verify-factor", verifyFactor)
 
-	http.HandleFunc("/enroll-factor", enrollHandler)
-
-	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
-		log.Panic(err)
-	}
-
+	http.ListenAndServe(conf.Addr, router)
 }
