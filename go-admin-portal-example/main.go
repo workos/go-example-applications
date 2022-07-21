@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"text/template"
 
+	"github.com/joho/godotenv"
 	"github.com/workos/workos-go/pkg/organizations"
 	"github.com/workos/workos-go/pkg/portal"
 )
@@ -24,9 +26,14 @@ func main() {
 		Raw_profile string
 	}
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	log.Printf("launching admin portal demo with configuration: %+v", conf)
-	apiKey := ""
+	apiKey := os.Getenv("WORKOS_API_KEY")
 
 	organizations.SetAPIKey(apiKey)
 
