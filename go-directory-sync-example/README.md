@@ -1,4 +1,4 @@
-# go-directory-sync-example
+# Go Directory Sync Example
 An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) for directory sync.
 
 ## Prerequisites
@@ -9,19 +9,19 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 1. Clone this git repo using your preferred secure method (HTTPS or SSH).
    ```bash
    # HTTPS
-   $ git clone https://github.com/workos-inc/Go-Example-Applications.git
+   git clone https://github.com/workos/go-Example-Applications.git
    ```
 
    or
 
    ```bash
    # SSH
-   $ git clone git@github.com:workos-inc/Go-Example-Applications.git
+   git clone git@github.com:workos/go-Example-Applications.git
    ```
 
 2. Navigate to the cloned repo.
    ```bash
-   $ cd Go-Example-Applications/go-directory-sync-example
+   cd go-Example-Applications/go-directory-sync-example
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
@@ -35,7 +35,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
 5. The final setup step is to start the server.
    ```bash
-   $ go run .
+   go run .
    ```
 
    You'll know the server is running when you see no errors in the CLI.
