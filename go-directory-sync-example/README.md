@@ -1,4 +1,4 @@
-# go-directory-sync-example
+# Go Directory Sync Example
 An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) for directory sync.
 
 ## Prerequisites
@@ -6,43 +6,42 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
 ## Go Project Setup
 
-1. Clone this git repo using your preferred secure method (HTTPS or SSH).
+1. Clone this git repository using your preferred secure method (HTTPS or SSH).
    ```bash
    # HTTPS
-   $ git clone https://github.com/workos-inc/Go-Example-Applications.git
+   git clone https://github.com/workos/go-Example-Applications.git
    ```
 
    or
 
    ```bash
    # SSH
-   $ git clone git@github.com:workos-inc/Go-Example-Applications.git
+   git clone git@github.com:workos/go-Example-Applications.git
    ```
 
-2. Navigate to the cloned repo.
+2. Navigate to the cloned repository.
    ```bash
-   $ cd Go-Example-Applications/go-directory-sync-example
+   cd go-Example-Applications/go-directory-sync-example
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
    - Your Directory ID
 
-
-4. Create a file called ".env" in the root of the project and add the following environment variables, replacing xxx with the values from your WorkOS dashboard. 
+4. Create a file called ".env" in the root of the project and add the following environment variables, replacing xxx with the values from your WorkOS dashboard.
    - WORKOS_API_KEY=xxx
    - WORKOS_DIRECTORY_ID=xxx
 
 5. The final setup step is to start the server.
    ```bash
-   $ go run .
+   go run .
    ```
 
    You'll know the server is running when you see no errors in the CLI.
 
    Navigate to `localhost:3042` in your web browser. You should see a "Users" button. If you click this link, you should see your users list.
 
-   You can stop the local server for now by entering `CTRL + c` on the command line.
+   You can stop the local server for now by entering `CTRL + c` on the command-line.
 
 ## Need help?
 
