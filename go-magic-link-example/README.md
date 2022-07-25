@@ -39,9 +39,8 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
    ```bash
    launching admin portal demo with configuration: {Addr::8000 Domains:}
    ```
-   
    Set the default redirect URI as "http://localhost:8000/success" in your WorkOS Dashboard Configuration tab and navigate to `localhost:8000` in your web browser to view the passwordless example app. 
-   
+
    Hooray!
 
 ## Need help?
