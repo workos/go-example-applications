@@ -1,25 +1,25 @@
-# Go-admin-portal-example
+# Go Admin Portal Example Applications
 An example Golang application demonstrating how to use the [WorkOS Golang SDK](https://github.com/workos/workos-go) so your customers can access the WorkOS Admin Portal from your application.
 
 
 ## Go Project Setup
 
-1. Clone the example repo using your preferred secure method (HTTPS or SSH).
+1. Clone the example repository using your preferred secure method (HTTPS or SSH).
    ```bash
    # HTTPS
-   $ git clone https://github.com/workos-inc/Go-Example-Applications.git
+   git clone https://github.com/workos/go-example-applications.git
    ```
 
    or
 
    ```bash
    # SSH
-   $ git clone git@github.com:workos-inc/Go-Example-Applications.git
+   git clone git@github.com:workos/go-example-applications.git
    ```
 
-2. Navigate to the cloned repo and to the admin portal:
+2. Navigate to the cloned repository and to the admin portal:
    ```bash
-   $ cd Go-Example-Applications/go-magic-link
+   cd go-Example-Applications/go-magic-link
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
