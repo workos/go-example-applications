@@ -40,7 +40,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
    Navigate to `localhost:8002` in your web browser. You should see a "Users" button. If you click this link, you should see your users list.
 
-   You can stop the local server for now by entering `CTRL + c` on the command line.
+   You can stop the local server for now by entering `CTRL + c` on the command-line.
 
 ## Need help?
 
