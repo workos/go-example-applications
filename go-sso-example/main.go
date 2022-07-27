@@ -138,7 +138,7 @@ func main() {
 
 	// Handle routes:
 	router.HandleFunc("/", signin)
-	router.Handle("/signin/", http.StripPrefix("/signin/", http.FileServer(http.Dir("static"))))
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/logout", logout)
 	http.ListenAndServe(conf.Addr, router)
 }
