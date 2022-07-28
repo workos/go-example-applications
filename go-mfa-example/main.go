@@ -71,7 +71,7 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		Value: "your_token",
 	})
 
-	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.EnvironmentID, SmsDetails["phone_number"], template.URL(qrCode)}
+	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.Object, SmsDetails["phone_number"], template.URL(qrCode)}
 	tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 	tmpl.Execute(w, this_response)
 }

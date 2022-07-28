@@ -14,6 +14,8 @@ github.com/workos/workos-go v1.9.0 h1:zDqZSpZ12BjhLd2t1bVanyB7eBpynnXOYazTaciCNR
 github.com/workos/workos-go v1.9.0/go.mod h1:FJQB/IO///w61WuasSb/IvcRkM5KaCJaTzIiTs+siOY=
 github.com/workos/workos-go v1.10.0 h1:9xy3mE+mr2jELG6fMWcxpnmrF7WLUsPYZW0F+W10k3g=
 github.com/workos/workos-go v1.10.0/go.mod h1:FJQB/IO///w61WuasSb/IvcRkM5KaCJaTzIiTs+siOY=
+github.com/workos/workos-go v1.13.0 h1:Q+kBm6FTMLi63LqpXwouRJrhoqN+/PXhrPyKKFVGj0M=
+github.com/workos/workos-go v1.13.0/go.mod h1:FJQB/IO///w61WuasSb/IvcRkM5KaCJaTzIiTs+siOY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
