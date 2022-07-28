@@ -101,7 +101,7 @@ func challengeFactor(w http.ResponseWriter, r *http.Request) {
 func verifyFactor(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 
-	verify, err := mfa.VerifyFactor(context.Background(), mfa.VerifyOpts{
+	verify, err := mfa.VerifyChallenge(context.Background(), mfa.VerifyOpts{
 		AuthenticationChallengeID: sessions["your_token"].challengeID,
 		Code:                      code,
 	})
