@@ -45,7 +45,11 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 	// Revoke users authentication
 	session.Values["authenticated"] = false
-	session.Save(r, w)
+	
+	if err := session.Save(r,w); err != nil {
+		log.Panic(err)
+	}
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -97,19 +101,28 @@ func main() {
 			log.Printf("get profile failed: %s", err)
 
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			_, err := w.Write([]byte(err.Error()))
+			if err != nil {
+				log.Panic(err)
+			}
 			return
 		}
 		session, _ := store.Get(r, "cookie-name")
 		session.Values["authenticated"] = true
-		session.Save(r, w)
+		if err := session.Save(r,w); err != nil {
+		log.Panic(err)
+	}
+	
 
 		// Display user profile:
 		b, err := json.MarshalIndent(profile, "", "    ")
 		if err != nil {
 			log.Printf("encoding profile failed: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			_, err := w.Write([]byte(err.Error()))
+			if err != nil {
+				log.Panic(err)
+			}
 		}
 
 		// define variable to hold data
@@ -133,12 +146,17 @@ func main() {
 		this_profile := Profile{first_name_string, last_name_string, raw_profile}
 
 		// Render the template
-		tmpl.Execute(w, this_profile)
+		if err := tmpl.Execute(w, this_profile); err != nil {
+			log.Panic(err)
+		}
 	})
 
 	// Handle routes:
 	router.HandleFunc("/", signin)
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.Handle("/signin/", http.StripPrefix("/signin/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/logout", logout)
-	http.ListenAndServe(conf.Addr, router)
+	if err := http.ListenAndServe(conf.Addr, router); err != nil {
+		log.Panic(err)
+	}
 }
