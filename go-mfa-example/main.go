@@ -29,7 +29,6 @@ var conf struct {
 type Response struct {
 	ID          string `json:"id"`
 	Type        string `json:"type"`
-	Environment string `json:"environment_id`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 	Phone       interface{}
@@ -42,7 +41,9 @@ type VerifyResponse struct {
 }
 
 func enrollHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		log.Panic(err)
+	}
 	enrolltype := r.FormValue("type")
 	totpissuer := r.FormValue("totp_issuer")
 	totpuser := r.FormValue("totp_user")
@@ -71,9 +72,11 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		Value: "your_token",
 	})
 
-	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, enroll.Object, SmsDetails["phone_number"], template.URL(qrCode)}
+	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
 	tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
-	tmpl.Execute(w, this_response)
+	if err := tmpl.Execute(w, this_response); err != nil {
+		log.Panic(err)
+	}
 }
 
 func challengeFactor(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +98,9 @@ func challengeFactor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
-	tmpl.Execute(w, "")
+	if err := tmpl.Execute(w, ""); err != nil {
+		log.Panic(err)
+	}
 }
 
 func verifyFactor(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +120,9 @@ func verifyFactor(w http.ResponseWriter, r *http.Request) {
 	challenge := verify.(mfa.VerifyResponse).Challenge
 	tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
 	this_response := VerifyResponse{valid, challenge}
-	tmpl.Execute(w, this_response)
+	if err := tmpl.Execute(w, this_response); err != nil {
+		log.Panic(err)
+	}
 }
 
 func main() {
@@ -135,5 +142,7 @@ func main() {
 	router.HandleFunc("/challenge-factor", challengeFactor)
 	router.HandleFunc("/verify-factor", verifyFactor)
 
-	http.ListenAndServe(conf.Addr, router)
+	if err := http.ListenAndServe(conf.Addr, router); err != nil {
+		log.Panic(err)
+	}
 }
