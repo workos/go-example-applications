@@ -43,7 +43,9 @@ func main() {
 
 	http.HandleFunc("/passwordless-auth", func(w http.ResponseWriter, r *http.Request) {
 		passwordless.SetAPIKey(conf.APIKey)
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			log.Panic(err)
+		}
 
 		email := r.Form["email"][0]
 
@@ -66,7 +68,9 @@ func main() {
 
 		this_profile := Profile{email, session.Link}
 		tmpl := template.Must(template.ParseFiles("./static/serve_magic_link.html"))
-		tmpl.Execute(w, this_profile)
+		if err := tmpl.Execute(w, this_profile); err != nil {
+			log.Panic(err)
+		}
 	})
 
 	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +92,9 @@ func main() {
 		}
 
 		tmpl := template.Must(template.ParseFiles("./static/success.html"))
-		tmpl.Execute(w, string(Raw_profile))
+		if err := tmpl.Execute(w, string(Raw_profile)); err != nil {
+			log.Panic(err)
+		}
 	})
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
