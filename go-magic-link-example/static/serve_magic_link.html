@@ -15,7 +15,7 @@
             <div class="logged_in_div_left">
                 <div>
                     <h1>Your app,</h1>
-                    <h2>Enterprise Ready</h2>
+                    <h2 class="home-hero-gradient">Enterprise Ready</h2>
                 </div>
                 <div>
                     <a href="https://workos.com/" target="_blank"><button class='button'>WorkOS</button></a>
@@ -27,9 +27,8 @@
             </div>
             <div class="logged_in_div_right">
                 <div class="flex_column">
-                    <h2>Here is your Magic Link &#129668;</h2>
+                    <h2>Here is your Magic Link, <code>{{.Email}}</code> &#129668;</h2>
                     <div class="text_box">
-                        <h2>{{.Email}}</h2>
                         <a href="{{.Session}}">{{.Session}}</a>
                     </div>
                 </div>
