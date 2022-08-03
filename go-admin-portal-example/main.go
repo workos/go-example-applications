@@ -7,15 +7,23 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+	"os"
 
 	"github.com/workos/workos-go/pkg/organizations"
 	"github.com/workos/workos-go/pkg/portal"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	var conf struct {
 		Addr    string
 		Domains string
+		APIKey string
 	}
 
 	type Profile struct {
@@ -25,10 +33,10 @@ func main() {
 	}
 
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
+	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	log.Printf("launching admin portal demo with configuration: %+v", conf)
-	apiKey := ""
 
-	organizations.SetAPIKey(apiKey)
+	organizations.SetAPIKey(conf.APIKey)
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
@@ -53,7 +61,7 @@ func main() {
 		tmpl.Execute(w, this_profile)
 
 		http.HandleFunc("/dsync-admin-portal", func(w http.ResponseWriter, r *http.Request) {
-			portal.SetAPIKey(apiKey)
+			portal.SetAPIKey(conf.APIKey)
 			organizationId := organization.ID
 			// Generate an SSO Adnim Portal Link using the Organization ID from above.
 			link, err := portal.GenerateLink(context.Background(), portal.GenerateLinkOpts{
@@ -67,7 +75,7 @@ func main() {
 		})
 
 		http.HandleFunc("/sso-admin-portal", func(w http.ResponseWriter, r *http.Request) {
-			portal.SetAPIKey(apiKey)
+			portal.SetAPIKey(conf.APIKey)
 			organizationId := organization.ID
 			// Generate an SSO Adnim Portal Link using the Organization ID from above.
 			link, err := portal.GenerateLink(context.Background(), portal.GenerateLinkOpts{
