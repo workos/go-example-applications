@@ -41,7 +41,9 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	http.HandleFunc("/provision-enterprise", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			log.Panic(err)
+		}
 		organizationDomains := []string{r.FormValue("domain")}
 		organizationName := r.FormValue("org")
 
@@ -58,7 +60,9 @@ func main() {
 		tmpl := template.Must(template.ParseFiles("./static/admin_logged_in.html"))
 		raw_profile := "profile"
 		this_profile := Profile{"first", "last", raw_profile}
-		tmpl.Execute(w, this_profile)
+		if err := tmpl.Execute(w, this_profile); err != nil {
+			log.Panic(err)
+		}
 
 		http.HandleFunc("/dsync-admin-portal", func(w http.ResponseWriter, r *http.Request) {
 			portal.SetAPIKey(conf.APIKey)
