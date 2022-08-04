@@ -7,25 +7,26 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
 1. Clone the example repository using your preferred secure method (HTTPS or SSH).
    ```bash
    # HTTPS
-   git clone https://github.com/workos/go-Example-Applications.git
+   git clone https://github.com/workos/go-example-applications.git
    ```
 
    or
 
    ```bash
    # SSH
-   git clone git@github.com:workos/go-Example-Applications.git
+   git clone git@github.com:workos/go-example-applications.git
    ```
 
 2. Navigate to the cloned repository and to the admin portal:
    ```bash
-   cd go-Example-Applications/go-admin-portal
+   cd go-example-applications/go-admin-portal
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
 
-4. Add this to your APIKey variable.
+4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the value from step 3:
+   - WORKOS_API_KEY=xxx
 
 ## Start the server
 
