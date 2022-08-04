@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"text/template"
 	"os"
+	"text/template"
 
+	"github.com/joho/godotenv"
 	"github.com/workos/workos-go/pkg/organizations"
 	"github.com/workos/workos-go/pkg/portal"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	var conf struct {
 		Addr    string
 		Domains string
-		APIKey string
+		APIKey  string
 	}
 
 	type Profile struct {
@@ -53,7 +53,7 @@ func main() {
 		})
 
 		if err != nil {
-			fmt.Println("There's an error")
+			fmt.Println("There was an error creating this organization.")
 		}
 
 		//handle logged in
