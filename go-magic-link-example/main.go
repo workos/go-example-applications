@@ -7,9 +7,12 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+	"flag"
+	"os"
 
 	"github.com/workos/workos-go/pkg/passwordless"
 	"github.com/workos/workos-go/pkg/sso"
+	"github.com/joho/godotenv"
 )
 
 type Profile struct {
@@ -18,16 +21,31 @@ type Profile struct {
 }
 
 func main() {
-	address := ":8000"
-	apiKey := ""
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	var conf struct {
+		Addr        string
+		APIKey      string
+		ClientID    string
+	}
+
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
+	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
+	flag.StringVar(&conf.ClientID, "client-id", os.Getenv("WORKOS_CLIENT_ID"), "The WorkOS client id.")
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
-	sso.Configure(apiKey, clientID)
+
+	sso.Configure(conf.APIKey, conf.ClientID)
 
 	http.HandleFunc("/passwordless-auth", func(w http.ResponseWriter, r *http.Request) {
-		passwordless.SetAPIKey(apiKey)
-		r.ParseForm()
+		passwordless.SetAPIKey(conf.APIKey)
+		if err := r.ParseForm(); err != nil {
+			log.Panic(err)
+		}
 
 		email := r.Form["email"][0]
 
@@ -50,7 +68,9 @@ func main() {
 
 		this_profile := Profile{email, session.Link}
 		tmpl := template.Must(template.ParseFiles("./static/serve_magic_link.html"))
-		tmpl.Execute(w, this_profile)
+		if err := tmpl.Execute(w, this_profile); err != nil {
+			log.Panic(err)
+		}
 	})
 
 	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
@@ -72,10 +92,12 @@ func main() {
 		}
 
 		tmpl := template.Must(template.ParseFiles("./static/success.html"))
-		tmpl.Execute(w, string(Raw_profile))
+		if err := tmpl.Execute(w, string(Raw_profile)); err != nil {
+			log.Panic(err)
+		}
 	})
 
-	if err := http.ListenAndServe(address, nil); err != nil {
+	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
 	}
 
