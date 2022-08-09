@@ -78,7 +78,7 @@ body {
   border: 2px solid #6363f1;
   border-radius: 26px;
   color: white;
-  padding: 16px 32px;
+  padding: 8px 16px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -200,6 +200,10 @@ div.text_box {
   border-style: solid;
   border-image:
       linear-gradient(#a163f1, #6363f1 22%, #3498ea 40%, #40dfa3 67%, rgba(64, 223, 163, 0)) 0 100%;
+}
+
+.text_box_2 {
+  text-align: center;
 }
 
 .logged_in_nav {
