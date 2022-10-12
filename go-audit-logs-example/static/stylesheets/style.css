@@ -4,6 +4,14 @@ body {
 
 }
 
+a {
+  text-decoration: none;
+}
+
+a:visited {
+  color: inherit;
+}
+
 .container_login {
   display: flex;
   flex-direction: column;
@@ -24,9 +32,22 @@ body {
   bottom: 10px;
 }
 
+.card {
+  border: 1px solid #9a9999;
+  border-radius: 10px;
+  margin: 0px 15px 0px 15px;
+  padding: 25px 50px;
+  margin-bottom: 20px;
+}
+
 .flex {
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.flex-start {
+  justify-content: start;
 }
 
 .flex_column {
@@ -40,18 +61,36 @@ body {
   justify-content: space-between;
 }
 
+.space-evenly {
+  justify-content: space-evenly;
+}
+
 .width-75 {
   width: 75%;
 }
 
 .width-40vw {
   width: 40vw;
-  overflow: scroll;
-  word-wrap: break-word;
 }
 
-.width-95 {
-  width: 95%;
+.width-15vw {
+  width: 15vw;
+}
+
+.width-100p {
+  width: 100%;
+}
+
+.margin-y-15 {
+  margin: 15px 0px;
+}
+
+.margin-y-30 {
+  margin: 30px 0px;
+}
+
+.margin-b-25 {
+  margin-bottom: 25px;
 }
 
 .container_success {
@@ -112,12 +151,66 @@ body {
   margin-left: 10px;
 }
 
+.login_button {
+  width: 95%;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+}
 
+.box {
+display: flex;
+justify-content: center;
+flex-direction: column;
+position: relative;
+background: white;
+margin: 15px;
+width: 18vw;
+height: 10vh;
+border-radius: 50px;
+text-align: center;
+color: rgb(39, 39, 40);
+}
 
-h2,
-h1 {
-  text-align: center;
-  color: #555555;
+.box:hover {
+  color: black;
+}
+
+.box:before {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(-7deg, #3498ea 16%, #40dfa3 100% );
+  transform: translate3d(23px, 9px, 0) scale(0.78);
+  filter: blur(19px);
+  opacity: var(0.29);
+  transition: opacity 0.3s;
+  border-radius: inherit;
+}
+
+.box:hover:before {
+  transform: translate3d(23px, 9px, 0) scale(0.82);
+}
+
+.box::after {
+content: "";
+z-index: -1;
+position: absolute;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+background: inherit;
+border-radius: 50px;
+}
+button.box {
+  border: none;
+}
+
+button.box p {
+  font-size: 17px;
 }
 
 .logged_in_div_right {
@@ -129,7 +222,6 @@ h1 {
   align-items: center;
   position: relative;
   bottom: 10%;
-  /* background-color: #f9f9fb; */
 }
 
 .logged_in_div_left {
@@ -156,20 +248,6 @@ h1 {
   margin-bottom: 0px;
   font-weight: normal;
   letter-spacing: -.05em;
-}
-
-.text_input {
-  border: 1px solid #555555;
-  border-radius: 10px;
-  margin: 20px 0px 7px 0px;
-  padding: 5px;
-  height: 35px;
-  width: 18vw;
-  text-align: center;
-}
-
-.text_input_2 {
-  margin-top: 0px;
 }
 
 .home-hero-gradient {
@@ -206,11 +284,6 @@ h1 {
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-.logged_in_div_right button {
-  padding: 8px 22px;
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-}
-
 div.text_box {
   background-color: #f9f9fb;
   width: 40vw;
@@ -242,11 +315,6 @@ div.text_box {
 
 .logged_in_nav img {
   height: 50px;
-  border-radius: 50%;
-}
-
-.logged_in_nav img:hover {
-  border: 2px solid #555555;
 }
 
 .nav-item {
@@ -263,64 +331,76 @@ div.text_box {
   border: 2px solid #f9f9fb;
 }
 
-.directory-buttons {
-  justify-content: space-between;
-  width: 40vw;
-}
-
 .nav-item:hover {
   background-color: #f9f9fb;
   border: 2px solid #f9f9fb;
   color: #a6a4a4;
 }
 
+.text-input {
+  border: 1px solid #555555;
+  border-radius: 10px;
+  margin: 20px 0px 7px 0px;
+  padding: 5px;
+  height: 35px;
+  width: 18vw;
+  text-align: center;
+}
+
 pre.prettyprint {
   border: none !important;
 }
 
-ul {
-  list-style-type: none;
-  margin-right: 35px;
-  text-decoration: none;
+.org-id {
+  font-size: 17px;
+  font-weight: bold;
 }
 
-li {
-  padding: 6px;
+.org-button-div {
+  min-width: 233px;
 }
 
-a:link {
-  text-decoration: none;
+#snackbar {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; /* Set a default minimum width */
+  margin-left: -125px; /* Divide value of min-width by 2 */
+  background-color: rgba(51, 51, 51, 0.786); /* Black background color */
+  color: #fff; /* White text color */
+  text-align: center; /* Centered text */
+  border-radius: 2px; /* Rounded borders */
+  padding: 16px; /* Padding */
+  position: fixed; /* Sit on top of the screen */
+  z-index: 1; /* Add a z-index if needed */
+  left: 50%; /* Center the snackbar */
+  bottom: 30px; /* 30px from the bottom */
 }
 
-a:visited {
-  text-decoration: none;
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+  visibility: visible; /* Show the snackbar */
+  /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+  However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: fadein 0.1s, fadeout 0.1s .5s;
+  animation: fadein 0.1s, fadeout 0.1s 0.5s;
 }
 
-li.even {
-  background-color: rgb(228, 228, 228);
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
 }
 
-.card {
-  border: 1px solid #555555;
-  border-radius: 10px;
-  margin: 0px 15px 0px 15px;
-  padding: 25px 50px;
-  margin-bottom: 20px;
-  text-align: center;
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
 }
 
-.webhooks-container {
-  width: 45vw;
-  padding: 25px;
-  max-height: 450px;
-  overflow-y: scroll;
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
 }
 
-#clear_button_div {
-
-  margin-bottom: 50px;
-}
-
-.hidden {
-  display: none;
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
 }
