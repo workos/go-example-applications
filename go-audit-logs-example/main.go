@@ -22,6 +22,7 @@ func init() {
 }
 
 var router = http.NewServeMux()
+var sessions = map[string]Organization{}
 
 type Organization struct {
 	Name string
@@ -53,6 +54,16 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, this_response); err != nil {
 		log.Panic(err)
 	}
+
+	sessions["your_organization"] = Organization{
+		Name: response.Name,
+		ID:   response.ID,
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session_token",
+		Value: "your_organization",
+	})
 
 	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
 		Organization: org,
@@ -90,7 +101,6 @@ func main() {
 	router.HandleFunc("/send-events", sendEvents)
 	//Action title: "user.signed_in" | Target type: "team"
 	//Action title: "user.logged_out" | Target type: "team"
-	//Action title: "user.organization_set" | Target type: "team"
 	//Action title: "user.organization_deleted" | Target type: "team"
 	//Action title: "user.connection_deleted" | Target type: "team"
 
