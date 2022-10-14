@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"text/template"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/workos/workos-go/pkg/auditlogs"
@@ -52,6 +53,34 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, this_response); err != nil {
 		log.Panic(err)
 	}
+
+	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
+		Organization: org,
+		Event: auditlogs.Event{
+			Action:     "user.organization_set",
+			OccurredAt: time.Now(),
+			Actor: auditlogs.Actor{
+				Type: "user",
+				Id:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
+			},
+			Targets: []auditlogs.Target{
+				{
+					Type: "team",
+					Id:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
+				},
+			},
+			Context: auditlogs.Context{
+				Location:  "123.123.123.123",
+				UserAgent: "Chrome/104.0.0.0",
+			},
+		},
+	},
+	)
+
+	if auditerr != nil {
+		fmt.Println(err)
+	}
+
 }
 
 func main() {
