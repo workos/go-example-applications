@@ -10,9 +10,15 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+
+	"github.com/gorilla/sessions"
 	"github.com/workos/workos-go/pkg/auditlogs"
 	"github.com/workos/workos-go/pkg/organizations"
 )
+
+var router = http.NewServeMux()
+var key = []byte("super-secret-key")
+var store = sessions.NewCookieStore(key)
 
 func init() {
 	// loads values from .env into the system
@@ -20,9 +26,6 @@ func init() {
 		log.Print("No .env file found")
 	}
 }
-
-var router = http.NewServeMux()
-var sessions = map[string]Organization{}
 
 type Organization struct {
 	Name string
@@ -46,7 +49,18 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("problem with response %s'", err)
+	}
+
+	session, _ := store.Get(r, "session-name")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	session.Values["org_id"] = org
+
+	if err := session.Save(r, w); err != nil {
+		log.Panic("problem saving cookie %s", err)
 	}
 
 	this_response := Organization{response.Name, response.ID}
@@ -54,16 +68,6 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, this_response); err != nil {
 		log.Panic(err)
 	}
-
-	sessions["your_organization"] = Organization{
-		Name: response.Name,
-		ID:   response.ID,
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Value: "your_organization",
-	})
 
 	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
 		Organization: org,
@@ -94,11 +98,27 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func sendEvent(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session-name")
+	organization := session.Values["org_id"]
+
+	fmt.Println("organization is %s", organization)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func checkOrg(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/static/", http.StatusSeeOther)
+}
+
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 
-	router.Handle("/", http.FileServer(http.Dir("./static")))
+	router.HandleFunc("/", checkOrg)
 	router.HandleFunc("/send-events", sendEvents)
+	router.HandleFunc("/send-event", sendEvent)
+
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	//Action title: "user.signed_in" | Target type: "team"
 	//Action title: "user.logged_out" | Target type: "team"
 	//Action title: "user.organization_deleted" | Target type: "team"
