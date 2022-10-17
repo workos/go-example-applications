@@ -104,7 +104,10 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendEvent(w http.ResponseWriter, r *http.Request) {
-
+	//Action title: "user.signed_in" | Target type: "team"
+	//Action title: "user.logged_out" | Target type: "team"
+	//Action title: "user.organization_deleted" | Target type: "team"
+	//Action title: "user.connection_deleted" | Target type: "team"
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -126,6 +129,15 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func exportEvents(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	organization := Organization{session.Values["org_name"].(string), session.Values["org_id"].(string)}
+	tmpl := template.Must(template.ParseFiles("./static/export_events.html"))
+	if err := tmpl.Execute(w, organization); err != nil {
+		log.Panic(err)
+	}
+}
+
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 
@@ -134,11 +146,8 @@ func main() {
 	router.HandleFunc("/get-org", getOrg)
 	router.HandleFunc("/send-events", sendEvents)
 	router.HandleFunc("/send-event", sendEvent)
+	router.HandleFunc("/export-events", exportEvents)
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	//Action title: "user.signed_in" | Target type: "team"
-	//Action title: "user.logged_out" | Target type: "team"
-	//Action title: "user.organization_deleted" | Target type: "team"
-	//Action title: "user.connection_deleted" | Target type: "team"
 
 	if err := http.ListenAndServe(":8001", router); err != nil {
 		log.Panic(err)
