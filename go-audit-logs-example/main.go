@@ -138,6 +138,47 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getEvents(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	today := time.Now().Format(time.RFC3339)
+	lastMonth := time.Now().AddDate(0, 0, -30).Format(time.RFC3339)
+
+	eventType := r.FormValue("event")
+
+	if eventType == "generate_csv" {
+
+		auditLogExport, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
+			Organization: session.Values["org_id"].(string),
+			RangeStart:   lastMonth,
+			RangeEnd:     today,
+		})
+
+		if err != nil {
+			fmt.Println("There was an error generating the CSV: %s", err)
+		}
+		session.Values["export_id"] = auditLogExport.Id
+
+		if err := session.Save(r, w); err != nil {
+			log.Panic("problem saving cookie %s", err)
+		}
+
+	}
+
+	if eventType == "access_csv" {
+
+		auditLogExport, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
+			ExportId: session.Values["export_id"].(string),
+		})
+		http.Redirect(w, r, auditLogExport.Url, http.StatusSeeOther)
+
+		if err != nil {
+			fmt.Println("There was an error accessing the CSV: %s", err)
+		}
+	}
+	http.Redirect(w, r, "/export-events", http.StatusSeeOther)
+
+}
+
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 
@@ -147,6 +188,7 @@ func main() {
 	router.HandleFunc("/send-events", sendEvents)
 	router.HandleFunc("/send-event", sendEvent)
 	router.HandleFunc("/export-events", exportEvents)
+	router.HandleFunc("/get-events", getEvents)
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	if err := http.ListenAndServe(":8001", router); err != nil {
