@@ -88,7 +88,7 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if auditerr != nil {
-		fmt.Println(err)
+		fmt.Println(auditerr)
 	}
 
 	http.Redirect(w, r, "/send-events", http.StatusSeeOther)
@@ -104,11 +104,37 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendEvent(w http.ResponseWriter, r *http.Request) {
-	//Action title: "user.signed_in" | Target type: "team"
-	//Action title: "user.logged_out" | Target type: "team"
-	//Action title: "user.organization_deleted" | Target type: "team"
-	//Action title: "user.connection_deleted" | Target type: "team"
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	session, _ := store.Get(r, "session-name")
+	eventType := r.FormValue("event")
+
+	err := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
+		Organization: session.Values["org_id"].(string),
+		Event: auditlogs.Event{
+			Action:     "user." + eventType,
+			OccurredAt: time.Now(),
+			Actor: auditlogs.Actor{
+				Type: "user",
+				Id:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
+			},
+			Targets: []auditlogs.Target{
+				{
+					Type: "team",
+					Id:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
+				},
+			},
+			Context: auditlogs.Context{
+				Location:  "123.123.123.123",
+				UserAgent: "Chrome/104.0.0.0",
+			},
+		},
+	},
+	)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 }
 
 func sessionHandler(w http.ResponseWriter, r *http.Request) {
@@ -142,11 +168,9 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	today := time.Now().Format(time.RFC3339)
 	lastMonth := time.Now().AddDate(0, 0, -30).Format(time.RFC3339)
-
 	eventType := r.FormValue("event")
 
 	if eventType == "generate_csv" {
-
 		auditLogExport, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
 			Organization: session.Values["org_id"].(string),
 			RangeStart:   lastMonth,
@@ -165,7 +189,6 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if eventType == "access_csv" {
-
 		auditLogExport, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
 			ExportId: session.Values["export_id"].(string),
 		})
