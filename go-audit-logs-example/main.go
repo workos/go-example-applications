@@ -94,6 +94,21 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 }
 
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+
+	// Revoke users authentication
+	session.Values["org_id"] = nil
+	session.Values["org_name"] = nil
+	session.Values["export_id"] = nil
+
+	if err := session.Save(r, w); err != nil {
+		log.Panic(err)
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func sendEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	organization := Organization{session.Values["org_name"].(string), session.Values["org_id"].(string)}
@@ -212,6 +227,7 @@ func main() {
 	router.HandleFunc("/send-event", sendEvent)
 	router.HandleFunc("/export-events", exportEvents)
 	router.HandleFunc("/get-events", getEvents)
+	router.HandleFunc("/logout", logout)
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	if err := http.ListenAndServe(":8001", router); err != nil {
