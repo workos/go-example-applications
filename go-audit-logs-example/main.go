@@ -49,7 +49,7 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		fmt.Println("problem with response %s'", err)
+		fmt.Println("problem with response:", err)
 	}
 
 	session, _ := store.Get(r, "session-name")
@@ -61,7 +61,7 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 	session.Values["org_name"] = response.Name
 
 	if err := session.Save(r, w); err != nil {
-		log.Panic("problem saving cookie %s", err)
+		log.Panic("problem saving cookie:", err)
 	}
 
 	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
@@ -178,12 +178,12 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			fmt.Println("There was an error generating the CSV: %s", err)
+			fmt.Println("There was an error generating the CSV:", err)
 		}
 		session.Values["export_id"] = auditLogExport.Id
 
 		if err := session.Save(r, w); err != nil {
-			log.Panic("problem saving cookie %s", err)
+			log.Panic("problem saving cookie", err)
 		}
 
 	}
@@ -195,7 +195,7 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, auditLogExport.Url, http.StatusSeeOther)
 
 		if err != nil {
-			fmt.Println("There was an error accessing the CSV: %s", err)
+			fmt.Println("There was an error accessing the CSV:", err)
 		}
 	}
 	http.Redirect(w, r, "/export-events", http.StatusSeeOther)
