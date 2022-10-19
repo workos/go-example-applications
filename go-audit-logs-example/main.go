@@ -230,7 +230,7 @@ func main() {
 	router.HandleFunc("/logout", logout)
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	if err := http.ListenAndServe(":8001", router); err != nil {
+	if err := http.ListenAndServe(":8000", router); err != nil {
 		log.Panic(err)
 	}
 }
