@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"text/template"
-	"flag"
 	"os"
+	"text/template"
 
-	"github.com/workos/workos-go/pkg/passwordless"
-	"github.com/workos/workos-go/pkg/sso"
 	"github.com/joho/godotenv"
+	"github.com/workos/workos-go/v2/pkg/passwordless"
+	"github.com/workos/workos-go/v2/pkg/sso"
 )
 
 type Profile struct {
@@ -27,17 +27,18 @@ func main() {
 	}
 
 	var conf struct {
-		Addr        string
-		APIKey      string
-		ClientID    string
+		Addr     string
+		APIKey   string
+		ClientID string
 	}
 
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.ClientID, "client-id", os.Getenv("WORKOS_CLIENT_ID"), "The WorkOS client id.")
 
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	log.Printf("launching passwordless demo with configuration: %+v", conf)
 
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	sso.Configure(conf.APIKey, conf.ClientID)
 
@@ -59,7 +60,7 @@ func main() {
 		}
 
 		err = passwordless.SendSession(context.Background(), passwordless.SendSessionOpts{
-			ID: session.ID,
+			SessionID: session.ID,
 		})
 
 		if err != nil {
@@ -74,7 +75,7 @@ func main() {
 	})
 
 	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
-		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
+		profileAndToken, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOpts{
 			Code: r.URL.Query().Get("code"),
 		})
 
