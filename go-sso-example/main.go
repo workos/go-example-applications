@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/pkg/sso"
+	"github.com/workos/workos-go/v2/pkg/sso"
 )
 
 var (
@@ -45,8 +45,8 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 	// Revoke users authentication
 	session.Values["authenticated"] = false
-	
-	if err := session.Save(r,w); err != nil {
+
+	if err := session.Save(r, w); err != nil {
 		log.Panic(err)
 	}
 
@@ -82,7 +82,7 @@ func main() {
 	sso.Configure(conf.APIKey, conf.ClientID)
 
 	// Handle login
-	router.Handle("/login", sso.Login(sso.GetAuthorizationURLOptions{
+	router.Handle("/login", sso.Login(sso.GetAuthorizationURLOpts{
 		Connection:  conf.Connection,
 		RedirectURI: conf.RedirectURI,
 	}))
@@ -94,7 +94,7 @@ func main() {
 		log.Printf("callback is called with %s", r.URL)
 
 		// Retrieving user profile:
-		profile, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOptions{
+		profile, err := sso.GetProfileAndToken(context.Background(), sso.GetProfileAndTokenOpts{
 			Code: r.URL.Query().Get("code"),
 		})
 		if err != nil {
@@ -109,10 +109,9 @@ func main() {
 		}
 		session, _ := store.Get(r, "cookie-name")
 		session.Values["authenticated"] = true
-		if err := session.Save(r,w); err != nil {
-		log.Panic(err)
-	}
-	
+		if err := session.Save(r, w); err != nil {
+			log.Panic(err)
+		}
 
 		// Display user profile:
 		b, err := json.MarshalIndent(profile, "", "    ")

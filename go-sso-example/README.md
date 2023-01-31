@@ -41,7 +41,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
    go run .
    ```
 
-   Navigate to `localhost:3042` in your web browser. You should see a "Login" button. If you click this link, you'll be redirected to an HTTP `404` page because we haven't set up SSO yet!
+   Navigate to `localhost:8000` in your web browser. You should see a "Login" button. If you click this link, you'll be redirected to an HTTP `404` page because we haven't set up SSO yet!
 
    You can stop the local server for now by entering `CTRL + c` on the command-line.
 
@@ -50,7 +50,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
 Follow the [SSO authentication flow instructions](https://workos.com/docs/sso/guide/introduction) to set up an SSO connection.
 
-When you get to the step where you provide the `REDIRECT_URI` value, use [http://localhost:3042/callback].
+When you get to the step where you provide the `REDIRECT_URI` value, use [http://localhost:8000/callback].
 
 If you get stuck, please reach out to us at support@workos.com so we can help.
 
@@ -62,7 +62,7 @@ If you get stuck, please reach out to us at support@workos.com so we can help.
    go run .
    ```
 
-   Once running, navigate to [http://localhost:3042] to test out the SSO workflow.
+   Once running, navigate to [http://localhost:8000] to test out the SSO workflow.
 
    Hooray!
 
