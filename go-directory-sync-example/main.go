@@ -12,8 +12,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/pkg/directorysync"
-	"github.com/workos/workos-go/pkg/webhooks"
+	"github.com/workos/workos-go/v2/pkg/directorysync"
+	"github.com/workos/workos-go/v2/pkg/webhooks"
 )
 
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +51,12 @@ func main() {
 		Users string
 	}
 
-	flag.StringVar(&conf.Addr, "addr", ":3042", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Directory, "directory", os.Getenv("WORKOS_DIRECTORY_ID"), "The WorkOS directory id.")
 	flag.Parse()
+
+	log.Printf("launching directory sync demo with configuration: %+v", conf)
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
