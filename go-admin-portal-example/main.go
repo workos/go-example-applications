@@ -10,8 +10,8 @@ import (
 	"text/template"
 
 	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/pkg/organizations"
-	"github.com/workos/workos-go/pkg/portal"
+	"github.com/workos/workos-go/v2/pkg/organizations"
+	"github.com/workos/workos-go/v2/pkg/portal"
 )
 
 func main() {
@@ -34,6 +34,7 @@ func main() {
 
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
+
 	log.Printf("launching admin portal demo with configuration: %+v", conf)
 
 	organizations.SetAPIKey(conf.APIKey)
@@ -75,7 +76,7 @@ func main() {
 			if err != nil {
 				log.Printf("get redirect failed: %s", err)
 			}
-			http.Redirect(w, r, link, 302)
+			http.Redirect(w, r, link, http.StatusFound)
 		})
 
 		http.HandleFunc("/sso-admin-portal", func(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +90,7 @@ func main() {
 			if err != nil {
 				log.Printf("get redirect failed: %s", err)
 			}
-			http.Redirect(w, r, link, 302)
+			http.Redirect(w, r, link, http.StatusFound)
 		})
 
 	})
