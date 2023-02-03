@@ -135,6 +135,8 @@ func main() {
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.Parse()
 
+	log.Printf("launching mfa demo with configuration: %+v", conf)
+
 	mfa.SetAPIKey(conf.APIKey)
 
 	router.Handle("/", http.FileServer(http.Dir("./static")))
