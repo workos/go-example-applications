@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/pkg/mfa"
+	"github.com/workos/workos-go/v2/pkg/mfa"
 )
 
 var sessions = map[string]session{}
@@ -27,12 +27,12 @@ var conf struct {
 }
 
 type Response struct {
-	ID          string `json:"id"`
-	Type        string `json:"type"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	Phone       interface{}
-	Totp        interface{}
+	ID        string `json:"id"`
+	Type      string `json:"type"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Phone     interface{}
+	Totp      interface{}
 }
 
 type VerifyResponse struct {
@@ -49,10 +49,10 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 	totpuser := r.FormValue("totp_user")
 	number := r.FormValue("phone_number")
 
-	enroll, err := mfa.EnrollFactor(context.Background(), mfa.GetEnrollOpts{
-		Type:        enrolltype,
-		TotpIssuer:  totpissuer,
-		TotpUser:    totpuser,
+	enroll, err := mfa.EnrollFactor(context.Background(), mfa.EnrollFactorOpts{
+		Type:        mfa.FactorType(enrolltype),
+		TOTPIssuer:  totpissuer,
+		TOTPUser:    totpuser,
 		PhoneNumber: number,
 	})
 	if err != nil {
@@ -60,8 +60,8 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SmsDetails := enroll.Sms
-	qrCode := fmt.Sprint(enroll.Totp["qr_code"])
+	SmsDetails := enroll.SMS
+	qrCode := fmt.Sprint(enroll.TOTP.QRCode)
 
 	sessions["your_token"] = session{
 		enrollID: enroll.ID,
@@ -72,7 +72,7 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		Value: "your_token",
 	})
 
-	this_response := Response{enroll.ID, enroll.Type, enroll.CreatedAt, enroll.UpdatedAt, SmsDetails["phone_number"], template.URL(qrCode)}
+	this_response := Response{enroll.ID, string(enroll.Type), enroll.CreatedAt, enroll.UpdatedAt, SmsDetails.PhoneNumber, template.URL(qrCode)}
 	tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
 	if err := tmpl.Execute(w, this_response); err != nil {
 		log.Panic(err)
@@ -83,9 +83,9 @@ func challengeFactor(w http.ResponseWriter, r *http.Request) {
 
 	smstemplate := r.FormValue("sms_message")
 
-	challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeOpts{
-		AuthenticationFactorID: sessions["your_token"].enrollID,
-		SMSTemplate:            smstemplate,
+	challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeFactorOpts{
+		FactorID:    sessions["your_token"].enrollID,
+		SMSTemplate: smstemplate,
 	})
 
 	if err != nil {
@@ -106,9 +106,9 @@ func challengeFactor(w http.ResponseWriter, r *http.Request) {
 func verifyFactor(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 
-	verify, err := mfa.VerifyChallenge(context.Background(), mfa.VerifyOpts{
-		AuthenticationChallengeID: sessions["your_token"].challengeID,
-		Code:                      code,
+	verify, err := mfa.VerifyChallenge(context.Background(), mfa.VerifyChallengeOpts{
+		ChallengeID: sessions["your_token"].challengeID,
+		Code:        code,
 	})
 
 	if err != nil {
@@ -116,8 +116,8 @@ func verifyFactor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valid := verify.(mfa.VerifyResponse).Valid
-	challenge := verify.(mfa.VerifyResponse).Challenge
+	valid := verify.Valid
+	challenge := verify.Challenge
 	tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
 	this_response := VerifyResponse{valid, challenge}
 	if err := tmpl.Execute(w, this_response); err != nil {
@@ -132,7 +132,7 @@ func main() {
 	}
 
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
-	flag.StringVar(&conf.Addr, "addr", ":8002", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.Parse()
 
 	mfa.SetAPIKey(conf.APIKey)

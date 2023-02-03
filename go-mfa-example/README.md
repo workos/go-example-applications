@@ -38,7 +38,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
    You'll know the server is running when you see no errors in the CLI.
 
-   Navigate to `localhost:8002` in your web browser. You should see a "Users" button. If you click this link, you should see your users list.
+   Navigate to `localhost:8000` in your web browser. You should see a "Users" button. If you click this link, you should see your users list.
 
    You can stop the local server for now by entering `CTRL + c` on the command-line.
 
