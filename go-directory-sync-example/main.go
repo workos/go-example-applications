@@ -34,6 +34,29 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleDirectories(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/index.html"))
+
+	// Get list of directories
+	list, err := directorysync.ListDirectories(
+		context.Background(),
+		directorysync.ListDirectoriesOpts{},
+	)
+
+	if err != nil {
+		log.Printf("get list of directories failed: %s", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	
+	data := directorysync.ListDirectoriesResponse{list.Data, list.ListMetadata}
+	// Render the template with the users as data
+	tmpl.Execute(w, data)
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -51,18 +74,19 @@ func main() {
 		Users string
 	}
 
-	flag.StringVar(&conf.Addr, "addr", ":3042", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Directory, "directory", os.Getenv("WORKOS_DIRECTORY_ID"), "The WorkOS directory id.")
 	flag.Parse()
 
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	log.Printf("launching directory sync demo with configuration: %+v", conf)
+
 
 	// Configure the WorkOS directory sync SDK:
 	directorysync.SetAPIKey(conf.APIKey)
 
 	// Handle users redirect:
-	tmpl := template.Must(template.ParseFiles("./static/users.html"))
+	tmpl2 := template.Must(template.ParseFiles("./static/users.html"))
 	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 
 		// Retrieving user profile:
@@ -90,11 +114,17 @@ func main() {
 		data := Users{stringB}
 
 		// Render the template with the users as data
-		tmpl.Execute(w, data)
+		tmpl2.Execute(w, data)
 	})
 
 	// Handle  webhooks
 	http.HandleFunc("/webhooks", handleWebhook)
+
+	http.HandleFunc("/", handleDirectories)
+	styles := http.FileServer(http.Dir("./static/stylesheets"))
+    http.Handle("/styles/", http.StripPrefix("/styles/", styles))
+
+	
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
