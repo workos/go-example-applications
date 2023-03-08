@@ -8,12 +8,14 @@ import (
 	"os"
 	"text/template"
 	"time"
+	"strconv"
 
 	"github.com/joho/godotenv"
 
 	"github.com/gorilla/sessions"
 	"github.com/workos/workos-go/v2/pkg/auditlogs"
 	"github.com/workos/workos-go/v2/pkg/organizations"
+	"github.com/workos/workos-go/v2/pkg/portal"
 	
 )
 
@@ -134,45 +136,64 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+type SendEventData struct{
+	Name string
+	ID   string
+	RangeStart string
+	RangeEnd string
+}
+
 func sendEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
-	organization := Organization{session.Values["org_name"].(string), session.Values["org_id"].(string)}
-	fmt.Println(organization)
 	tmpl := template.Must(template.ParseFiles("./static/send_events.html"))
-	if err := tmpl.Execute(w, organization); err != nil {
+	currentTime := time.Now()
+	rangeEnd := currentTime.AddDate(0, 0, 30)
+
+	data := SendEventData{session.Values["org_name"].(string), session.Values["org_id"].(string), currentTime.Format(time.RFC3339), rangeEnd.Format(time.RFC3339)}
+	
+	if err := tmpl.Execute(w, data); err != nil {
 		log.Panic(err)
 	}
 }
 
 func sendEvent(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
-	eventType := r.FormValue("event")
+	eventVersion, err := strconv.Atoi(r.FormValue("event-version"))
+	if err != nil {
+		fmt.Println("Couldn't convert version to string", err)
+	}
+	actorName := r.FormValue("actor-name")
+	actorType := r.FormValue("actor-type")
+	targetName := r.FormValue("target-name")
+	targetType := r.FormValue("target-type")
 
-	err := auditlogs.CreateEvent(context.Background(), auditlogs.CreateEventOpts{
+	err = auditlogs.CreateEvent(context.Background(), auditlogs.CreateEventOpts{
 		OrganizationID: session.Values["org_id"].(string),
 		Event: auditlogs.Event{
-			Action:     "user." + eventType,
+			Action:     "user.organization_deleted",
 			OccurredAt: time.Now(),
+			Version:    eventVersion,
 			Actor: auditlogs.Actor{
-				Type: "user",
-				ID:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
+				ID:   "user_TF4C5938",
+				Type: actorType,
+				Name: actorName,
 			},
 			Targets: []auditlogs.Target{
 				{
-					Type: "team",
-					ID:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
+					Type: targetType,
+					ID:   "user_98432YHF",
+					Name: targetName,
 				},
 			},
 			Context: auditlogs.Context{
-				Location:  "123.123.123.123",
+				Location:  "1.1.1.1",
 				UserAgent: "Chrome/104.0.0.0",
 			},
 		},
-	},
-	)
+	})
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Couldn't send event:", err)
 	}
 
 	http.Redirect(w, r, "/send-events", http.StatusSeeOther)
@@ -198,54 +219,75 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 
 func exportEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
-	organization := Organization{session.Values["org_name"].(string), session.Values["org_id"].(string)}
-	tmpl := template.Must(template.ParseFiles("./static/export_events.html"))
-	if err := tmpl.Execute(w, organization); err != nil {
-		log.Panic(err)
-	}
-}
+	eventType  := r.FormValue("event")
 
-func getEvents(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
-	today := time.Now().Format(time.RFC3339)
-	lastMonth := time.Now().AddDate(0, 0, -30).Format(time.RFC3339)
-	eventType := r.FormValue("event")
+	if eventType == "access_csv" {
 
-	if eventType == "generate_csv" {
-		auditLogExport, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
+		fmt.Println(session)
+		export, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
+			ExportID: session.Values["export_id"].(string),
+		})
+	
+		if err != nil {
+			fmt.Println("Error exporting events:", err)
+		}
+	
+		http.Redirect(w, r, export.URL, http.StatusSeeOther)
+	} else {
+		rangeStart := r.FormValue("range-start")
+		rangeEnd := r.FormValue("range-end")
+		actions := r.FormValue("actions")
+		actors := r.FormValue("actors")
+		targets := r.FormValue("targets")
+		
+		export, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
 			OrganizationID: session.Values["org_id"].(string),
-			RangeStart:   lastMonth,
-			RangeEnd:     today,
+			RangeStart:     rangeStart,
+			RangeEnd:       rangeEnd,
+			Actions:        []string{actions},
+			Actors:         []string{actors},
+			Targets:        []string{targets},
 		})
 
 		if err != nil {
-			fmt.Println("There was an error generating the CSV:", err)
+			fmt.Println("Error creating export:", err)
 		}
-		session.Values["export_id"] = auditLogExport.ID
+
+		
+		session.Values["export_id"] = export.ID
 
 		if err := session.Save(r, w); err != nil {
 			log.Panic("problem saving cookie", err)
 		}
-
+		
+		http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 	}
-
-	if eventType == "access_csv" {
-		auditLogExport, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
-			ExportID: session.Values["export_id"].(string),
-		})
-		http.Redirect(w, r, auditLogExport.URL, http.StatusSeeOther)
-
-		if err != nil {
-			fmt.Println("There was an error accessing the CSV:", err)
-		}
-	}
-	http.Redirect(w, r, "/export-events", http.StatusSeeOther)
-
 }
 
+
+func events(w http.ResponseWriter, r *http.Request){
+	intent := r.URL.Query().Get("intent")
+	session, _ := store.Get(r, "session-name")
+	
+	link, err := portal.GenerateLink(
+		context.Background(),
+		portal.GenerateLinkOpts{
+			Organization: session.Values["org_id"].(string),
+			Intent:       portal.GenerateLinkIntent(intent),
+		},
+	)
+
+	if err != nil {
+		fmt.Println("Error generating portal link:", err)
+	}
+
+	http.Redirect(w, r, link, http.StatusFound)
+
+}
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 	organizations.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
+	portal.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 
 	router.HandleFunc("/", sessionHandler)
 	
@@ -255,10 +297,10 @@ func main() {
 	router.HandleFunc("/index", handleOrganizations)
 
 	router.HandleFunc("/get-org", getOrg)
+	router.HandleFunc("/events", events)
 	router.HandleFunc("/send-events", sendEvents)
 	router.HandleFunc("/send-event", sendEvent)
 	router.HandleFunc("/export-events", exportEvents)
-	router.HandleFunc("/get-events", getEvents)
 	router.HandleFunc("/logout", logout)
 
 

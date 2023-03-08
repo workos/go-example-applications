@@ -7,7 +7,7 @@
 <body class="container_success">
     <div class="logged_in_div_left flex_column">
         <div class="flex logged_in_div_left_title">
-            <div><h2>{{ .Name }}</h2></div>
+            <div><h2>{{  .Name }}</h2></div>
             <div><i icon-name="settings" class="stroke_width=1"></i></div>
         </div>
         <hr style="height:0.5px;width:75%;">
@@ -66,13 +66,13 @@
                         <div data-tab-target="#send-events" name='#send-events' class="flex space-evenly width-11vw content-button tab">
                             <div><i icon-name="send" class="stroke_width=1"></i></div>
                             <div>
-                                <a href="#send-events" class="remove-style"><button class="remove-style">Send Events</button></a>
+                                <a href="/send-events" class="remove-style"><button class="remove-style">Send Events</button></a>
                             </div>                            
                         </div>
                         <div data-tab-target="#export-events" name='#export-events' class="flex space-evenly width-11vw content-button  tab">
                             <div><i icon-name="download" class="stroke_width=1"></i></div>
                             <div>
-                                <a href="#export-events" class="remove-style"><button class="remove-style">Export Events</button></a>
+                                <a href="/export-events" class="remove-style"><button class="remove-style">Export Events</button></a>
                             </div>                            
                         </div>
                         <div class="flex space-evenly width-11vw content-button tab">
@@ -95,7 +95,7 @@
                             <p>Configure and send a "User Organization Deleted" Event</p>  
                           </div>
                           <hr style="height:0.5px;width:100%;margin-bottom:25px;">                                                 
-                          <form action="" method="POST">                           
+                          <form action="/send-event" method="POST">                           
                            <div class="event-form-input-group flex-column flex-start">
                             <div><label for="event-version">Event Version</label></div>
                             <div><input required name="event-version" class="text-input" type="text" placeholder="[Integer] schema version of the event"></div>
@@ -127,7 +127,7 @@
                         </div>
     
                         <div id="export-events" name='#export-events' data-tab-content>
-                            <form action="" method="POST">
+                            <form action="/export-events" method="POST">
                                 <h3>Export Events</h3>
                                 <div>
                                     <p>Audit Log events can be exported in a 2 step process. First, generate a CSV, and then Download it.</p>                                    
@@ -136,11 +136,11 @@
                                 <div class="flex-column">
                                     <div class="event-form-input-group flex-column flex-start">
                                         <div><label for="range-start">Range Start</label></div>
-                                        <div><input required name="range-start" class="text-input" type="text" value="" placeholder="ISO-8601 value for start of the export range"></div>
+                                        <div><input required name="range-start" class="text-input" type="text" value="{{ .RangeStart }}" placeholder="ISO-8601 value for start of the export range"></div>
                                     </div> 
                                     <div class="event-form-input-group flex-column flex-start">
                                         <div><label for="range-end">Range End</label></div>
-                                        <div><input required name="range-end" class="text-input" type="text" value="" placeholder="ISO-8601 value for end of the export range"></div>
+                                        <div><input required name="range-end" class="text-input" type="text" value="{{ .RangeEnd }}" placeholder="ISO-8601 value for end of the export range"></div>
                                     </div> 
                                     <div class="event-form-input-group flex-column flex-start">
                                         <div><label for="filter-actions">Actions</label></div>
@@ -175,6 +175,7 @@
 
     <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
     <script>
+
         function showSnackbar() {
             var x = document.getElementById("snackbar");
             x.className = "show";
@@ -218,6 +219,7 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>lucide.createIcons()</script>  
+
 </body>
 
 </html>
