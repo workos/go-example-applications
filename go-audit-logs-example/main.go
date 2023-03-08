@@ -12,13 +12,39 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/gorilla/sessions"
-	"github.com/workos/workos-go/pkg/auditlogs"
-	"github.com/workos/workos-go/pkg/organizations"
+	"github.com/workos/workos-go/v2/pkg/auditlogs"
+	"github.com/workos/workos-go/v2/pkg/organizations"
+	
 )
 
 var router = http.NewServeMux()
 var key = []byte("super-secret-key")
 var store = sessions.NewCookieStore(key)
+
+// Displays Organizations if a session doesn't exist
+func handleOrganizations(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/index.html"))
+
+	list, err := organizations.ListOrganizations(
+		context.Background(),
+		organizations.ListOrganizationsOpts{},
+	)
+
+	// Get orgs
+	if err != nil {
+		log.Printf("get organizations failed: %s", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	
+	data := organizations.ListOrganizationsResponse{list.Data, list.ListMetadata}
+
+	// Render the template with the organizations
+	tmpl.Execute(w, data)
+}
 
 func init() {
 	// loads values from .env into the system
@@ -32,14 +58,13 @@ type Organization struct {
 	ID   string
 }
 
+
 func getOrg(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		log.Panic(err)
 	}
 
-	org := r.FormValue("org")
-
-	organizations.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
+	org := r.URL.Query().Get("id")
 
 	response, err := organizations.GetOrganization(
 		context.Background(),
@@ -64,19 +89,19 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 		log.Panic("problem saving cookie:", err)
 	}
 
-	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
-		Organization: org,
+	auditerr := auditlogs.CreateEvent(context.Background(), auditlogs.CreateEventOpts{
+		OrganizationID: org,
 		Event: auditlogs.Event{
 			Action:     "user.organization_set",
 			OccurredAt: time.Now(),
 			Actor: auditlogs.Actor{
 				Type: "user",
-				Id:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
+				ID:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
 			},
 			Targets: []auditlogs.Target{
 				{
 					Type: "team",
-					Id:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
+					ID:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
 				},
 			},
 			Context: auditlogs.Context{
@@ -112,6 +137,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 func sendEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	organization := Organization{session.Values["org_name"].(string), session.Values["org_id"].(string)}
+	fmt.Println(organization)
 	tmpl := template.Must(template.ParseFiles("./static/send_events.html"))
 	if err := tmpl.Execute(w, organization); err != nil {
 		log.Panic(err)
@@ -122,19 +148,19 @@ func sendEvent(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	eventType := r.FormValue("event")
 
-	err := auditlogs.CreateEvent(context.Background(), auditlogs.AuditLogEventOpts{
-		Organization: session.Values["org_id"].(string),
+	err := auditlogs.CreateEvent(context.Background(), auditlogs.CreateEventOpts{
+		OrganizationID: session.Values["org_id"].(string),
 		Event: auditlogs.Event{
 			Action:     "user." + eventType,
 			OccurredAt: time.Now(),
 			Actor: auditlogs.Actor{
 				Type: "user",
-				Id:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
+				ID:   "user_01GBNJC3MX9ZZJW1FSTF4C5938",
 			},
 			Targets: []auditlogs.Target{
 				{
 					Type: "team",
-					Id:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
+					ID:   "team_01GBNJD4MKHVKJGEWK42JNMBGS",
 				},
 			},
 			Context: auditlogs.Context{
@@ -160,13 +186,13 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 		// if val is a string
 		switch val {
 		case "":
-			http.Redirect(w, r, "/static/", http.StatusSeeOther)
+			http.Redirect(w, r, "/index", http.StatusSeeOther)
 		default:
 			http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 		}
 	} else {
 		// if val is not a string type
-		http.Redirect(w, r, "/static/", http.StatusSeeOther)
+		http.Redirect(w, r, "/index", http.StatusSeeOther)
 	}
 }
 
@@ -187,7 +213,7 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 
 	if eventType == "generate_csv" {
 		auditLogExport, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
-			Organization: session.Values["org_id"].(string),
+			OrganizationID: session.Values["org_id"].(string),
 			RangeStart:   lastMonth,
 			RangeEnd:     today,
 		})
@@ -195,7 +221,7 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("There was an error generating the CSV:", err)
 		}
-		session.Values["export_id"] = auditLogExport.Id
+		session.Values["export_id"] = auditLogExport.ID
 
 		if err := session.Save(r, w); err != nil {
 			log.Panic("problem saving cookie", err)
@@ -205,9 +231,9 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 
 	if eventType == "access_csv" {
 		auditLogExport, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
-			ExportId: session.Values["export_id"].(string),
+			ExportID: session.Values["export_id"].(string),
 		})
-		http.Redirect(w, r, auditLogExport.Url, http.StatusSeeOther)
+		http.Redirect(w, r, auditLogExport.URL, http.StatusSeeOther)
 
 		if err != nil {
 			fmt.Println("There was an error accessing the CSV:", err)
@@ -219,8 +245,14 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
+	organizations.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 
 	router.HandleFunc("/", sessionHandler)
+	
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	router.HandleFunc("/index", handleOrganizations)
 
 	router.HandleFunc("/get-org", getOrg)
 	router.HandleFunc("/send-events", sendEvents)
@@ -228,7 +260,7 @@ func main() {
 	router.HandleFunc("/export-events", exportEvents)
 	router.HandleFunc("/get-events", getEvents)
 	router.HandleFunc("/logout", logout)
-	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 
 	if err := http.ListenAndServe(":8000", router); err != nil {
 		log.Panic(err)
