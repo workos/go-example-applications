@@ -254,16 +254,12 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rangeStart := r.FormValue("range-start")
 		rangeEnd := r.FormValue("range-end")
-		actions := r.FormValue("actions")
-		actors := r.FormValue("actors")
 		targets := r.FormValue("targets")
 		
 		export, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
 			OrganizationID: session.Values["org_id"].(string),
 			RangeStart:     rangeStart,
 			RangeEnd:       rangeEnd,
-			Actions:        []string{actions},
-			Actors:         []string{actors},
 			Targets:        []string{targets},
 		})
 
