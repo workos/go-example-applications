@@ -243,7 +243,7 @@ func main() {
 	}
 
 
-	flag.StringVar(&conf.Addr, "addr", ":8080", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Directory, "directory", os.Getenv("WORKOS_DIRECTORY_ID"), "The WorkOS directory id.")
 	flag.Parse()

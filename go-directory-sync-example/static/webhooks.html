@@ -87,7 +87,7 @@
       var clearButton = document.getElementById("clear_button");
       var tutorialButton = document.getElementById("tutorial_button");
 
-      var socket = new WebSocket("ws://localhost:8080/ws");
+      var socket = new WebSocket("ws://localhost:8000/ws");
 
       socket.onopen = () => {
         console.log("Successfully Connected");
