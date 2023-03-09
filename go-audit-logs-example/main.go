@@ -16,6 +16,7 @@ import (
 	"github.com/workos/workos-go/v2/pkg/auditlogs"
 	"github.com/workos/workos-go/v2/pkg/organizations"
 	"github.com/workos/workos-go/v2/pkg/portal"
+	"github.com/workos/workos-go/v2/pkg/common"
 	
 )
 
@@ -30,6 +31,13 @@ type SendEventData struct{
 	RangeEnd string
 }
 
+type Organizations struct {
+	Data []organizations.Organization
+	Metadata common.ListMetadata
+	Before string
+	After string
+}
+
 func init() {
 	// loads values from .env into the system
 	if err := godotenv.Load(); err != nil {
@@ -38,14 +46,24 @@ func init() {
 }
 
 
-// Displays Organizations if a session doesn't exist
+// Displays Organizations 
 func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/index.html"))
 
+	before := r.URL.Query().Get("before")
+	after := r.URL.Query().Get("after")
+
 	list, err := organizations.ListOrganizations(
 		context.Background(),
-		organizations.ListOrganizationsOpts{},
+		organizations.ListOrganizationsOpts{
+			Before: before,
+			After: after,
+			Limit: 5,
+		},
 	)
+
+	before = list.ListMetadata.Before
+	after = list.ListMetadata.After
 
 	// Get orgs
 	if err != nil {
@@ -57,7 +75,7 @@ func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	
-	data := organizations.ListOrganizationsResponse{list.Data, list.ListMetadata}
+	data := Organizations{list.Data, list.ListMetadata, before, after}
 
 	// Render the template with the organizations
 	tmpl.Execute(w, data)
@@ -198,18 +216,23 @@ func sendEvent(w http.ResponseWriter, r *http.Request) {
 
 func sessionHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
+	before := r.URL.Query().Get("before")
+	after := r.URL.Query().Get("after")
 
-	if val, ok := session.Values["org_id"].(string); ok {
-		// if val is a string
-		switch val {
-		case "":
+	// if pagination parameters not present, check for a session
+	if before == "" && after == "" {
+		if val, ok := session.Values["org_id"].(string); ok {
+			// if val is a string
+			switch val {
+			case "":
+				http.Redirect(w, r, "/index", http.StatusSeeOther)
+			default:
+				http.Redirect(w, r, "/send-events", http.StatusSeeOther)
+			}
+		} else {
+			// if val is not a string type
 			http.Redirect(w, r, "/index", http.StatusSeeOther)
-		default:
-			http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 		}
-	} else {
-		// if val is not a string type
-		http.Redirect(w, r, "/index", http.StatusSeeOther)
 	}
 }
 
