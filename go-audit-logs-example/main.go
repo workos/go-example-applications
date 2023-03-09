@@ -254,8 +254,11 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rangeStart := r.FormValue("range-start")
 		rangeEnd := r.FormValue("range-end")
-		targets := r.FormValue("targets")
+		targets := r.FormValue("filter-targets")
+
+		fmt.Println(ac)
 		
+		fmt.Println([]string{actors})
 		export, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
 			OrganizationID: session.Values["org_id"].(string),
 			RangeStart:     rangeStart,
