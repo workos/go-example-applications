@@ -1,9 +1,11 @@
 # Go Audit Logs Example
+
 An example Golang application demonstrating how to use the [WorkOS Golang SDK](https://github.com/workos/workos-go) to send and retrieve Audit Log events. This example is not meant to show a real-world example of an Audit Logs implementation, but rather to show concrete examples of how events can be sent using the Go SDK.
 
 ## Go Project Setup
 
 1. Clone the example repository using your preferred secure method (HTTPS or SSH).
+
    ```bash
    # HTTPS
    git clone https://github.com/workos/go-example-applications.git
@@ -17,21 +19,24 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
    ```
 
 2. Navigate to the cloned repository and to the Audit Logs:
+
    ```bash
    cd go-example-applications/go-audit-logs-example
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
+
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
    - Your [WorkOS Client ID](https://dashboard.workos.com/configuration)
 
 4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the value from step 3:
    - WORKOS_API_KEY=xxx
-   -WORKOS_CLIENT_ID=xxx
+     -WORKOS_CLIENT_ID=xxx
 
 ## Start the server
 
 5. The final setup step is to start the server.
+
    ```bash
    go run main.go
    ```

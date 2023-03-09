@@ -23,6 +23,21 @@ var router = http.NewServeMux()
 var key = []byte("super-secret-key")
 var store = sessions.NewCookieStore(key)
 
+type SendEventData struct{
+	Name string
+	ID   string
+	RangeStart string
+	RangeEnd string
+}
+
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
+
+
 // Displays Organizations if a session doesn't exist
 func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/index.html"))
@@ -48,19 +63,6 @@ func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func init() {
-	// loads values from .env into the system
-	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
-	}
-}
-
-type Organization struct {
-	Name string
-	ID   string
-}
-
-
 func getOrg(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		log.Panic(err)
@@ -76,7 +78,7 @@ func getOrg(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		fmt.Println("problem with response:", err)
+		fmt.Println("Problem with response:", err)
 	}
 
 	session, _ := store.Get(r, "session-name")
@@ -136,26 +138,21 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-type SendEventData struct{
-	Name string
-	ID   string
-	RangeStart string
-	RangeEnd string
-}
-
+// Executes the send_events template
 func sendEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	tmpl := template.Must(template.ParseFiles("./static/send_events.html"))
 	currentTime := time.Now()
-	rangeEnd := currentTime.AddDate(0, 0, 30)
+	rangeStart := currentTime.AddDate(0, 0, -30)
 
-	data := SendEventData{session.Values["org_name"].(string), session.Values["org_id"].(string), currentTime.Format(time.RFC3339), rangeEnd.Format(time.RFC3339)}
+	data := SendEventData{session.Values["org_name"].(string), session.Values["org_id"].(string), rangeStart.Format(time.RFC3339), currentTime.Format(time.RFC3339)}
 	
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Panic(err)
 	}
 }
 
+// Submits an event on form submission
 func sendEvent(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	eventVersion, err := strconv.Atoi(r.FormValue("event-version"))
@@ -200,7 +197,6 @@ func sendEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func sessionHandler(w http.ResponseWriter, r *http.Request) {
-
 	session, _ := store.Get(r, "session-name")
 
 	if val, ok := session.Values["org_id"].(string); ok {
@@ -217,13 +213,12 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Generates or exports CSV by form event type 
 func exportEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	eventType  := r.FormValue("event")
 
 	if eventType == "access_csv" {
-
-		fmt.Println(session)
 		export, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
 			ExportID: session.Values["export_id"].(string),
 		})
@@ -259,12 +254,12 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 		if err := session.Save(r, w); err != nil {
 			log.Panic("problem saving cookie", err)
 		}
-		
+
 		http.Redirect(w, r, "/send-events", http.StatusSeeOther)
 	}
 }
 
-
+// Generates an Admin Portal Link by Intent
 func events(w http.ResponseWriter, r *http.Request){
 	intent := r.URL.Query().Get("intent")
 	session, _ := store.Get(r, "session-name")
@@ -284,10 +279,13 @@ func events(w http.ResponseWriter, r *http.Request){
 	http.Redirect(w, r, link, http.StatusFound)
 
 }
+
 func main() {
 	auditlogs.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 	organizations.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
 	portal.SetAPIKey(os.Getenv("WORKOS_API_KEY"))
+
+	log.Printf("launching audit log demo")
 
 	router.HandleFunc("/", sessionHandler)
 	
@@ -295,7 +293,6 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	router.HandleFunc("/index", handleOrganizations)
-
 	router.HandleFunc("/get-org", getOrg)
 	router.HandleFunc("/events", events)
 	router.HandleFunc("/send-events", sendEvents)
