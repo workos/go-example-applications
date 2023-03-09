@@ -213,7 +213,7 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Generates or exports CSV by form event type 
+// Generates or exports CSV by form event 
 func exportEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	eventType  := r.FormValue("event")
@@ -287,11 +287,8 @@ func main() {
 
 	log.Printf("launching audit log demo")
 
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/", sessionHandler)
-	
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	router.HandleFunc("/index", handleOrganizations)
 	router.HandleFunc("/get-org", getOrg)
 	router.HandleFunc("/events", events)
