@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/workos/workos-go/v2/pkg/directorysync"
 	"github.com/workos/workos-go/v2/pkg/webhooks"
+	"github.com/workos/workos-go/v2/pkg/common"
 )
 
 type Directory struct {
@@ -23,6 +24,13 @@ type Directory struct {
 
 type Users struct {
 	Users string
+}
+
+type Directories struct {
+	Data []directorysync.Directory
+	Metadata common.ListMetadata
+	Before string
+	After string
 }
 
 // A helper function for template
@@ -51,10 +59,17 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 func handleDirectories(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/index.html"))
 
+	before := r.URL.Query().Get("before")
+	after := r.URL.Query().Get("after")
+
 	// Get list of directories
 	list, err := directorysync.ListDirectories(
 		context.Background(),
-		directorysync.ListDirectoriesOpts{},
+		directorysync.ListDirectoriesOpts{
+			Before: before,
+			After: after,
+			Limit: 5,
+		},
 	)
 
 	if err != nil {
@@ -65,8 +80,10 @@ func handleDirectories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	before = list.ListMetadata.Before
+	after = list.ListMetadata.After
 	
-	data := directorysync.ListDirectoriesResponse{list.Data, list.ListMetadata}
+	data := Directories{list.Data, list.ListMetadata, before, after}
 	// Render the template with the users as data
 	tmpl.Execute(w, data)
 }

@@ -71,19 +71,19 @@
           </table>
         </div>
         <div class="flex flex-end width-65vw">
-          {% if after %}
+          {{ if .After }}
           <div>
-            <a href="/?after="
+            <a href="/?after={{ .After }}"
               ><button class="button page-title">Previous</button></a
             >
           </div>
-          {% endif %} {% if before %}
+          {{ end }} {{ if .Before }}
           <div>
-            <a href="/?before="
+            <a href="/?before= {{ .Before }}"
               ><button class="button page-title">Next</button></a
             >
           </div>
-          {% endif %}
+          {{ end }}
         </div>
       </div>
     </div>

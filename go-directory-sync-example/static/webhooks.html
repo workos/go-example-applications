@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="/styles/style.css" />
+</head>
+
+<body class="container_success">
+    <div class="logged_in_nav">
+        <div class="flex">
+            <div>
+                <img src="/images/workos_logo_new.png" alt="workos logo">
+            </div>
+        </div>
+        <div>
+            <a href="https://workos.com/docs" target="_blank"><button class='button nav-item'>Documentation</button></a>
+            <a href="https://workos.com/docs/reference" target="_blank"><button class='button nav-item'>API
+                    Reference</button></a>
+            <a href="https://workos.com/blog" target="_blank"><button
+                    class='button nav-item blog-nav-button'>Blog</button></a>
+            <a href="https://workos.com/" target="_blank"><button class='button button-outline'>WorkOS</button></a>
+        </div>
+    </div>
+    <div class='flex'>
+        <div class="logged_in_div_left">
+            <div class="title-text">
+                <h1>Your app,</h1>
+                <h2 class="home-hero-gradient">Enterprise Ready</h2>
+            </div>
+            <div class="title-subtext">
+                <p>Start selling to enterprise customers with just a few lines of code.</p>
+                <p>Implement features like single sign-on in minutes instead of months.</p>
+            </div>
+            <div class="flex success-buttons">
+                <a href="https://workos.com/signup" target="_blank"><button class='button'>Get Started</button></a>
+                <a href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry" target="_blank"><button
+                        class='button button-outline sales-button'>Contact
+                        Sales</button></a>
+            </div>
+        </div>
+        <div class="logged_in_div_right">
+            <div class="flex_column">
+                <h2>Webhooks</h2>
+                <div id="webhooks-view" class="width-40vw webhooks-container">
+
+                </div>
+            </div>
+            <div id='clear_button_div' class='flex directory_container'>
+                <div id="tutorial_button" class="flex half_width">
+                    <a href="https://workos.com/blog/test-workos-webhooks-locally-ngrok" target="_blank"
+                        class="button webhooks-tutorial-button">Webhooks Tutorial</a>
+                </div>
+                <div id="clear_button" class="hidden">
+                    <a href="/webhooks" class="button button-outline">Clear</a>
+                </div>
+                <div>
+                    <a style="align-self:flex-end; padding:10px;" href="javascript:history.back()"><button
+                            class='button button-outline'>Back</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+         var counter = 0
+        var webhooksView = document.getElementById('webhooks-view')
+        var clearButtonDiv = document.getElementById('clear_button_div')
+        var clearButton = document.getElementById('clear_button')
+        var tutorialButton = document.getElementById('tutorial_button')
+
+        var socket = new WebSocket("ws://localhost:8000/ws");
+
+
+        socket.on('webhook_received', (data) => {
+            var formattedData = JSON.stringify(JSON.parse(data), null, 2)
+            console.log(formattedData)
+            webhooksView.classList.add("webhooks_container")
+            webhooksView.insertAdjacentHTML("afterbegin",
+
+                "<div class='margin_top width-40vw'> Webhook received at: " + new Date().toISOString() + "</div>" +
+                "<br/>" +
+                "<pre>" + "<code>" + formattedData + "<code>" + "</pre>" +
+                "<br/>" + "<hr/>" + "<br/>"
+            );
+            if (counter < 1) {
+                clearButtonDiv.classList.remove('login_button')
+                clearButtonDiv.classList.add('flex_right')
+                clearButton.classList.remove('hidden')
+                tutorialButton.classList.add('hidden')
+                counter++
+            }
+        })
+    </script>
+    
+</body>
+
+</html>
