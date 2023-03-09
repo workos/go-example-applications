@@ -175,8 +175,9 @@ func sendEvent(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	eventVersion, err := strconv.Atoi(r.FormValue("event-version"))
 	if err != nil {
-		fmt.Println("Couldn't convert version to string", err)
+		fmt.Println("Couldn't convert version to int", err)
 	}
+	fmt.Println(eventVersion)
 	actorName := r.FormValue("actor-name")
 	actorType := r.FormValue("actor-type")
 	targetName := r.FormValue("target-name")
@@ -187,7 +188,7 @@ func sendEvent(w http.ResponseWriter, r *http.Request) {
 		Event: auditlogs.Event{
 			Action:     "user.organization_deleted",
 			OccurredAt: time.Now(),
-			Version:    eventVersion,
+			Version:    1,
 			Actor: auditlogs.Actor{
 				ID:   "user_TF4C5938",
 				Type: actorType,
@@ -255,17 +256,22 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 		rangeStart := r.FormValue("range-start")
 		rangeEnd := r.FormValue("range-end")
 		targets := r.FormValue("filter-targets")
-
-		fmt.Println(ac)
-		
-		fmt.Println([]string{actors})
-		export, err := auditlogs.CreateExport(context.Background(), auditlogs.CreateExportOpts{
+		opts := auditlogs.CreateExportOpts{ 
 			OrganizationID: session.Values["org_id"].(string),
 			RangeStart:     rangeStart,
 			RangeEnd:       rangeEnd,
-			Targets:        []string{targets},
-		})
+			Targets:  []string{targets},
+		 }
+		if actors := r.FormValue("filter-actors"); actors != "" {
+		  opts.Actors = []string{actors}
+		}
+		if actions:= r.FormValue("filter-actions"); actions != "" {
+			opts.Actions = []string{actions}
+		  }
 
+		export, err := auditlogs.CreateExport(context.Background(), opts)
+
+		fmt.Println(export)
 		if err != nil {
 			fmt.Println("Error creating export:", err)
 		}
@@ -320,7 +326,7 @@ func main() {
 	router.HandleFunc("/logout", logout)
 
 
-	if err := http.ListenAndServe(":8000", router); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Panic(err)
 	}
 }
