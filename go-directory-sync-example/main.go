@@ -15,6 +15,7 @@ import (
 	"github.com/workos/workos-go/v2/pkg/directorysync"
 	"github.com/workos/workos-go/v2/pkg/webhooks"
 	"github.com/workos/workos-go/v2/pkg/common"
+	"github.com/gorilla/websocket"
 )
 
 type Directory struct {
@@ -38,7 +39,32 @@ func mod(i, j int) bool {
 	return i%j ==0
 }
 
+var upgrader = websocket.Upgrader{
+    ReadBufferSize:  1024,
+    WriteBufferSize: 1024,
+}
+
+var conn *websocket.Conn
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+    // upgrade this connection to a WebSocket connection
+    ws, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        log.Println(err)
+    }
+
+    log.Println("Client Connected")
+
+	conn = ws
+}
+
+
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/webhooks.html"))
+	
+	//Validate the Webhook
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -48,12 +74,21 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	hook, err := hooks.ValidatePayload(r.Header.Get("Workos-Signature"), bodyString)
 	fmt.Println("WORKOS WEBHOOKS")
 	if err != nil {
-		fmt.Println("Errors found:")
-		fmt.Println(err)
+		fmt.Println("Errors found:", err)
 	} else {
-		fmt.Println("Webhook Succesfully Validated:")
-		fmt.Println(hook)
+		fmt.Println("Webhook Succesfully Validated:", hook)
 	}
+
+	tmpl.Execute(w, "")
+
+	// send the body to the websocket connection if it exists
+    if conn != nil {
+		err = conn.WriteMessage(1, []byte(body))
+    	if err != nil {
+        	log.Println(err)
+    	}
+	} 
+	
 }
 
 func handleDirectories(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +119,8 @@ func handleDirectories(w http.ResponseWriter, r *http.Request) {
 	after = list.ListMetadata.After
 	
 	data := Directories{list.Data, list.ListMetadata, before, after}
-	// Render the template with the users as data
+
+	// Render the template with the directories
 	tmpl.Execute(w, data)
 }
 
@@ -189,7 +225,7 @@ func handleGroups(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := directorysync.ListGroupsResponse{list.Data, list.ListMetadata}
-	// Render the template with the users as data
+	// Render the template with the groups as data
 	tmpl.Execute(w, data)
 }
 
@@ -207,7 +243,7 @@ func main() {
 	}
 
 
-	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8080", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Directory, "directory", os.Getenv("WORKOS_DIRECTORY_ID"), "The WorkOS directory id.")
 	flag.Parse()
@@ -216,20 +252,19 @@ func main() {
 
 	// Configure the WorkOS directory sync SDK:
 	directorysync.SetAPIKey(conf.APIKey)
-
-	// Handle  webhooks
 	http.HandleFunc("/webhooks", handleWebhook)
-
+	http.HandleFunc("/ws", wsEndpoint)
 	http.HandleFunc("/", handleDirectories)
+	http.HandleFunc("/directory", handleDirectory)
+	http.HandleFunc("/users", handleUsers)
+	http.HandleFunc("/groups", handleGroups)
+
+	// render stylesheet and images
 	styles := http.FileServer(http.Dir("./static/stylesheets"))
     http.Handle("/styles/", http.StripPrefix("/styles/", styles))
 
 	images := http.FileServer(http.Dir("./static/images"))
     http.Handle("/images/", http.StripPrefix("/images/", images))
-
-	http.HandleFunc("/directory", handleDirectory)
-	http.HandleFunc("/users", handleUsers)
-	http.HandleFunc("/groups", handleGroups)
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)
