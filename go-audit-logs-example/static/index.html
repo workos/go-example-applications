@@ -1,28 +1,127 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="./stylesheets/style.css">
+    <link rel="stylesheet" href="./static/stylesheets/style.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
 </head>
 
-<body class="container_login">
-    <div class='flex_column'>
-        <div class="flex heading_div">
-            <img src="./images/workos_logo_new.png" alt="workos logo">
-        </div>
-
-        <h2>Go Audit Logs Example App</h2>
-        <form method="POST" action="/get-org">
-            <div class='flex_column'>
-                <div>
-                    <input type="text" id="org" name="org" class="text-input">
+<body class="container_success">
+    <div class="logged_in_div_left flex_column">
+        <div class="flex logged_in_div_left_title">
+            <div class="flex-column">
+                <div class="flex space-between">
+                    <div><h2>Audit Logs</h2></div>
+                    <div><i icon-name="settings" class="stroke_width=1"></i></div>
                 </div>
+                <div><p class="sub-heading">Go Example App</p></div>
+            </div>                    
+        </div>
+        <hr style="height:0.5px;width:75%;">
+        <div class="flex flex_column success-buttons">
+            <a href="/logout">
+                <div class="flex sidebar-button selected">
+                    <div><i icon-name="settings-2" class="stroke_width=1"></i></div>
+                    <div>
+                        <p>Organizations</p>
+                    </div>
+                </div>
+            </a>            
+            <div id="myBtn" class="flex sidebar-button">
+                <div><i icon-name="edit" class="stroke_width=1"></i></div>
                 <div>
-                    <button type="submit" class="button">Submit Organization ID</button>
+                    <p>Audit Logs</p>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
+
+    <div class="logged_in_div_right">
+        <div class="logged_in_nav">
+            <div class="flex">
+                <div>
+                    <a href="https://workos.com/docs" target="_blank"><button class='button nav-item'>Documentation</button></a>
+                </div>
+                <div>
+                    <a href="https://workos.com/docs/reference" target="_blank"><button class='button nav-item'>API
+                        Reference</button></a>
+                </div>
+                <div>
+                    <a href="https://workos.com/blog" target="_blank"><button
+                        class='button nav-item blog-nav-button'>Blog</button></a>
+                </div>
+                <div>
+                    <a href="https://workos.com/" target="_blank">
+                        <img class="nav-image" src="./static/images/workos_favicon.png" alt="link to workos.com">
+                    </a> 
+                </div>
+            </div>
+        </div>
+        <div class="flex_column logged_in_right_content width-65vw height-65vh">    
+            <div class="flex flex-start width-65vw page-title">
+                <h2>Select Organization</h2>
+            </div>       
+            <div class='flex_column card width-65vw'>                
+                <div>
+                    <table class="width-65vw">
+                        <tr>
+                          <th>Organization</th>
+                          <th>ID</th>
+                          <th>View Settings</th>
+                        </tr>
+                        {{ with .Data }} {{ range . }}           
+                          <tr>
+                            <td>{{ .Name }}</td>
+                            <td>{{ .ID }}</td>                
+                            <td><a class="button button-outline width-95" href="/get-org?id={{ .ID }}"><i icon-name="settings-2" class="stroke_width=1"></i></a></td>
+                          </tr>
+                        {{ end }}   
+                        {{ end }}                 
+                      </table>   
+                </div>                     
+                <div class="flex flex-end width-65vw">
+                    {{ if .After }}
+                    <div>
+                        <a href="/index?after={{ .After }}"><button class="button page-title">Previous</button></a>
+                    </div>                        
+                    {{ end }}
+                    {{ if .Before }}
+                    <div>
+                        <a href="/index?before={{ .Before }}"><button class="button page-title">Next</button></a>
+                    </div>                    
+                    {{ end }}            
+                </div>    
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p>Please select an Organization</p>
+        </div>
+      
+    </div>
+    <script>
+
+    var modal = document.getElementById("myModal");
+    var btn = document.getElementById("myBtn");
+    var span = document.getElementsByClassName("close")[0];
+    btn.onclick = function() {
+    modal.style.display = "block";
+    }
+    span.onclick = function() {
+    modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+    }
+    </script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons()</script>  
 </body>
 
 </html>
