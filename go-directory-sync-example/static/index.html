@@ -1,19 +1,95 @@
 <html>
-    <head>
-        <link rel="stylesheet" href="./stylesheets/style.css">
-    </head>
+  <head>
+    <link rel="stylesheet" href="/styles/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Inter"
+    />
+  </head>
 
-    <body class="container_login">
-        <div class='flex_column'>
-            <div class="flex heading_div">
-                <img src="./images/workos_logo_new.png" alt="workos logo">
-            </div>
-    
-                <h2>Go Directory Sync Example App</h2>
-                <a class="button login_button" href="/users">See Users From Linked Directory</a>
-
+  <body>
+    <div class="logged_in_nav">
+      <div class="flex space-between width-100vw">
+        <div><p>Go Directory Sync Example App</p></div>
+        <div class="flex">
+          <div>
+            <a href="https://workos.com/docs" target="_blank"
+              ><button class="button nav-item">Documentation</button></a
+            >
+          </div>
+          <div>
+            <a href="https://workos.com/docs/reference" target="_blank"
+              ><button class="button nav-item">API Reference</button></a
+            >
+          </div>
+          <div>
+            <a href="https://workos.com/blog" target="_blank"
+              ><button class="button nav-item blog-nav-button">Blog</button></a
+            >
+          </div>
+          <div>
+            <a href="https://workos.com/" target="_blank">
+              <img
+                class="nav-image"
+                src="/images/workos_logo_new.png"
+                alt="link to workos.com"
+              />
+            </a>
+          </div>
         </div>
-    </body>
+      </div>
+    </div>
+    <div class="flex_column height-70vh">
+      <div class="flex width-70vw space-between">
+        <div>
+          <h2>Select a Directory</h2>
+        </div>
+        <div>
+          <a href="/webhooks" class="button button-outline">Test Webhooks</a>
+        </div>
+      </div>
 
-   
+      <div class="flex_column card width-65vw">
+        <div>
+          <table class="width-65vw">
+            <tr>
+              <th>Organization</th>
+              <th>ID</th>
+              <th>View Settings</th>
+            </tr>
+            {{ with .Data }} {{ range . }}
+            <tr>
+              <td>{{ .Name }}</td>
+              <td>{{ .ID }}</td>
+              <td>
+                <a class="button button-outline" href="/directory?id={{ .ID }}"
+                  ><i icon-name="settings-2" class="stroke_width=1"></i
+                ></a>
+              </td>
+            </tr>
+            {{ end }} {{ end }}
+          </table>
+        </div>
+        <div class="flex flex-end width-65vw">
+          {{ if .After }}
+          <div>
+            <a href="/?after={{ .After }}"
+              ><button class="button page-title">Previous</button></a
+            >
+          </div>
+          {{ end }} {{ if .Before }}
+          <div>
+            <a href="/?before= {{ .Before }}"
+              ><button class="button page-title">Next</button></a
+            >
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
 </html>

@@ -54,33 +54,35 @@
       </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
-          <h2>User Details</h2>
-
-          {{ if .Data }}
+          <h2>Raw Directory Object Details</h2>
           <div class="text_box">
-            <ul>
-              {{ range $i, $e := .Data }} {{ if mod $i 2}}
-              <li class="even">
-                {{ .FirstName }} {{ .LastName}}: <code>{{ .Username }}</code>
-              </li>
-
-              {{ else }}
-              <li>
-                {{ .FirstName }} {{ .LastName }}: <code>{{ .Username }}</code>
-              </li>
-              {{end}} {{ end }}
-            </ul>
+            <pre class="prettyprint">
+                        {{ .Directory }}
+                    </pre
+            >
           </div>
-          {{ else }}
-          <div class="card width-40vw"><code>No Users Found</code></div>
-          {{ end }}
-          <a
-            style="align-self: flex-end; padding: 10px"
-            href="javascript:history.back()"
-            ><button class="button button-sm button-outline">Back</button></a
-          >
+        </div>
+        <div class="flex directory-buttons">
+          <div class="flex">
+            <a href="/users?id={{ .ID }}"
+              ><button class="button">Users</button></a
+            >
+            <br />
+            <a href="/groups?id={{ .ID }}"
+              ><button class="button">Groups</button></a
+            >
+          </div>
+
+          <div>
+            <a
+              style="align-self: flex-end; padding: 10px"
+              href="javascript:history.back()"
+              ><button class="button button-sm button-outline">Back</button></a
+            >
+          </div>
         </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   </body>
 </html>
