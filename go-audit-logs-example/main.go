@@ -326,7 +326,7 @@ func main() {
 	router.HandleFunc("/logout", logout)
 
 
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":8000", router); err != nil {
 		log.Panic(err)
 	}
 }
