@@ -1,12 +1,15 @@
 # Go MFA Example Applications
+
 An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) for MFA.
 
 ## Prerequisites
+
 - Go
 
 ## Go Project Setup
 
 1. Clone this git repository using your preferred secure method (HTTPS or SSH).
+
    ```bash
    # HTTPS
    git clone https://github.com/workos/go-example-applications.git
@@ -20,18 +23,21 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
    ```
 
 2. Navigate to the cloned repository.
+
    ```bash
    cd go-example-applications/go-mfa-example
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
+
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
 
-
 4. Create a file called ".env" in the root of the project and add the following environment variables, replacing xxx with the values from your WorkOS dashboard.
+
    - WORKOS_API_KEY=xxx
 
 5. The final setup step is to start the server.
+
    ```bash
    go run .
    ```

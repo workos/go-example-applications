@@ -1,69 +1,154 @@
 <html>
-
-<head>
-    
-    <link rel="stylesheet" href="/stylesheets/style.css">
-</head>
-
-<body class="container_success">
+  <head>
+    <link rel="stylesheet" href="./static/stylesheets/style.css" />
+  </head>
+  <body class="container_success">
     <div class="logged_in_nav">
-        <div class="flex">
-            <div>
-                <img src="/images/workos_logo_new.png" alt="workos logo">
-            </div>
-            <div class="flex">
-                <p>WorkOS</p>
-            </div>
-        </div>
+      <div class="flex">
         <div>
-            <a href="https://workos.com/docs" target="_blank"><button class='button nav-item'>Documentation</button></a>
-            <a href="https://workos.com/docs/reference" target="_blank"><button class='button nav-item'>API
-                    Reference</button></a>
-            <a href="https://workos.com/blog" target="_blank"><button
-                    class='button nav-item blog-nav-button'>Blog</button></a>
-            <a href="https://workos.com/" target="_blank"><button class='button button-outline'>WorkOS</button></a>
+          <img
+            src="../public/images/workos-logo-with-text.png"
+            alt="workos logo"
+          />
         </div>
+      </div>
+      <div>
+        <a href="https://workos.com/docs" target="_blank"
+          ><button class="button nav-item">Documentation</button></a
+        >
+        <a href="https://workos.com/docs/reference" target="_blank"
+          ><button class="button nav-item">API Reference</button></a
+        >
+        <a href="https://workos.com/blog" target="_blank"
+          ><button class="button nav-item blog-nav-button">Blog</button></a
+        >
+        <a href="https://workos.com/" target="_blank"
+          ><button class="button button-outline">WorkOS</button></a
+        >
+      </div>
     </div>
-    <div class='flex'>
-        <div class="logged_in_div_left">
-            <div class="title-text">
-                <h1>Your app,</h1>
-                <h2 class="home-hero-gradient">Enterprise Ready</h2>
-            </div>
-            <div class="title-subtext">
-                <p>Start selling to enterprise customers with just a few lines of code.</p>
-                <p>Implement features like single sign-on in minutes instead of months.</p>
-            </div>
-            <div class="flex success-buttons">
-                <a href="https://workos.com/signup" target="_blank"><button class='button'>Get Started</button></a>
-                <a href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry" target="_blank"><button
-                        class='button button-outline sales-button'>Contact
-                        Sales</button></a>
-            </div>
+    <div class="flex">
+      <div class="logged_in_div_left">
+        <div class="title-text">
+          <h1>Your app,</h1>
+          <h2 class="home-hero-gradient">Enterprise Ready</h2>
         </div>
-        <div class="logged_in_div_right">
-            <div class="flex_column">
-                <div class="flex-column">
+        <div class="title-subtext">
+          <p>
+            Start selling to enterprise customers with just a few lines of code.
+          </p>
+          <p>
+            Implement features like single sign-on in minutes instead of months.
+          </p>
+        </div>
+        <div class="flex success-buttons">
+          <a href="https://workos.com/signup" target="_blank"
+            ><button class="button">Get Started</button></a
+          >
+          <a
+            href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry"
+            target="_blank"
+            ><button class="button button-outline sales-button">
+              Contact Sales
+            </button></a
+          >
+        </div>
+      </div>
+      <div class="logged_in_div_right">
+        <div class="flex_column">
+          <div class="flex-column"></div>
+          <div class="flex-column">
+            <div>
+              <form method="POST" action="/verify_factor">
+                <div class="flex_column">
+                  <div class="flex form-wrap">
+                    <input
+                      type="text"
+                      id="code-1"
+                      name="code-1"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                    <input
+                      type="text"
+                      id="code-2"
+                      name="code-2"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                    <input
+                      type="text"
+                      id="code-3"
+                      name="code-3"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                    <input
+                      type="text"
+                      id="code-4"
+                      name="code-4"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                    <input
+                      type="text"
+                      id="code-5"
+                      name="code-5"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                    <input
+                      type="text"
+                      id="code-6"
+                      name="code-6"
+                      maxlength="1"
+                      class="text_input code-input"
+                      placeholder="-"
+                    />
+                  </div>
+                  <div class="flex space-evenly width_25vw">
                     <div>
-                        <form method="POST" action="/verify-factor">
-                            <div class='flex_column'>
-                                <div>
-                                    <input type="text" id="code" name="code" class="text_input"
-                                        placeholder="Input Auth Code">
-                                </div>
-                                <div>
-                                    <button type="submit" class="button">Verify Factor</button>
-                                </div>
-                            </div>
-                        </form>
-
+                      <button type="submit" class="button button-sm">
+                        Verify Factor
+                      </button>
                     </div>
+                    <div>
+                      <a href="/"
+                        ><button type="button" class="button button-sm">
+                          Go Back Home
+                        </button></a
+                      >
+                    </div>
+                  </div>
                 </div>
-
+              </form>
             </div>
-
+          </div>
         </div>
+      </div>
     </div>
-</body>
-
+  </body>
+  <script>
+    var container = document.getElementsByClassName("form-wrap")[0];
+    container.onkeyup = function (e) {
+      var target = e.srcElement;
+      var maxLength = parseInt(target.attributes["maxlength"].value, 10);
+      var myLength = target.value.length;
+      if (myLength >= maxLength) {
+        var next = target;
+        while ((next = next.nextElementSibling)) {
+          if (next == null) break;
+          if (next.tagName.toLowerCase() == "input") {
+            next.focus();
+            break;
+          }
+        }
+      }
+    };
+  </script>
 </html>

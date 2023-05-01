@@ -1,128 +1,130 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-
+	"fmt"
+	"encoding/json"
+	"encoding/gob"
+	"context"
+	"html/template"
 	"github.com/joho/godotenv"
 	"github.com/workos/workos-go/v2/pkg/mfa"
+	"github.com/gorilla/sessions"
 )
 
-var sessions = map[string]session{}
 var router = http.NewServeMux()
-
-type session struct {
-	enrollID    string
-	challengeID string
-}
+var key = []byte("super-secret-key")
+var store = sessions.NewCookieStore(key)
 
 var conf struct {
 	APIKey string
 	Addr   string
 }
 
-type Response struct {
-	ID        string `json:"id"`
-	Type      string `json:"type"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Phone     interface{}
-	Totp      interface{}
+type Cookie struct {
+	Type        string
+	ID			string
+	Phone       string
+	CreatedAt   string
+	UpdatedAt   string
 }
 
-type VerifyResponse struct {
-	Valid     bool `json:"valid"`
-	Challenge interface{}
+type Factor struct {
+    Type  string
+    ID string
+}
+
+
+func displayFactors(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/index.html"))
+	session, _ := store.Get(r, "cookie-name")
+	
+	fmt.Println(session.Values["factors"])
+
+
+
+	// Render the template with the directories
+	tmpl.Execute(w, "test")
+}
+
+func enrollFactor(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/enroll_factors.html"))
+	data := "test"
+	// Render the template with the directories
+	tmpl.Execute(w, data)
+}
+
+type EnrollRequest struct {
+    Type        mfa.FactorType `json:"type"`
+    TOTPIssuer  string         `json:"issuer"`
+    TOTPUser    string         `json:"user"`
+	PhoneNumber 		string			`json:"phone_number"`
+}
+
+func enroll(enrollOpts mfa.EnrollFactorOpts) (mfa.Factor, error) {
+    enroll, err := mfa.EnrollFactor(context.Background(), enrollOpts)
+    return enroll, err
 }
 
 func enrollHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Panic(err)
-	}
-	enrolltype := r.FormValue("type")
-	totpissuer := r.FormValue("totp_issuer")
-	totpuser := r.FormValue("totp_user")
-	number := r.FormValue("phone_number")
+    var req EnrollRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+       fmt.Println(err)
+    }
 
-	enroll, err := mfa.EnrollFactor(context.Background(), mfa.EnrollFactorOpts{
-		Type:        mfa.FactorType(enrolltype),
-		TOTPIssuer:  totpissuer,
-		TOTPUser:    totpuser,
-		PhoneNumber: number,
-	})
+    enrollOpts := mfa.EnrollFactorOpts{
+        Type:        req.Type,
+        TOTPIssuer:  req.TOTPIssuer,
+        TOTPUser:    req.TOTPUser,
+        PhoneNumber: req.PhoneNumber,
+    }
+
+
+    enrollResponse, err := enroll(enrollOpts)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+	cookie := Cookie{
+		Type:        string(req.Type),
+		ID:          enrollResponse.ID,
+		Phone:       req.PhoneNumber,
+		CreatedAt:   enrollResponse.CreatedAt,
+		UpdatedAt:   enrollResponse.UpdatedAt,
+	}
+
+	// Get the session
+	session, err := store.Get(r, "cookie-name")
 	if err != nil {
-		log.Printf("enroll factor failed: %s", err)
-		return
+		fmt.Println(err)
 	}
 
-	SmsDetails := enroll.SMS
-	qrCode := fmt.Sprint(enroll.TOTP.QRCode)
+	factorsInterface := session.Values["factors"]
 
-	sessions["your_token"] = session{
-		enrollID: enroll.ID,
+	if factorsInterface == nil {
+		factorsInterface = []Cookie{}
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Value: "your_token",
-	})
-
-	this_response := Response{enroll.ID, string(enroll.Type), enroll.CreatedAt, enroll.UpdatedAt, SmsDetails.PhoneNumber, template.URL(qrCode)}
-	tmpl := template.Must(template.ParseFiles("./static/factor_detail.html"))
-	if err := tmpl.Execute(w, this_response); err != nil {
-		log.Panic(err)
-	}
+factors, ok := factorsInterface.([]Cookie)
+if !ok {
+    fmt.Println("Factors not ok")
 }
 
-func challengeFactor(w http.ResponseWriter, r *http.Request) {
+// Append the new cookie to the factors array
+factors = append(factors, cookie)
 
-	smstemplate := r.FormValue("sms_message")
+// Set the updated factors slice back into the session
+session.Values["factors"] = factors
 
-	challenge, err := mfa.ChallengeFactor(context.Background(), mfa.ChallengeFactorOpts{
-		FactorID:    sessions["your_token"].enrollID,
-		SMSTemplate: smstemplate,
-	})
-
+	err = session.Save(r, w)
 	if err != nil {
-		log.Printf("challengefailed: %s", err)
-		return
+		fmt.Println(err)
 	}
-
-	sessions["your_token"] = session{
-		challengeID: challenge.ID,
-	}
-
-	tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
-	if err := tmpl.Execute(w, ""); err != nil {
-		log.Panic(err)
-	}
-}
-
-func verifyFactor(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
-
-	verify, err := mfa.VerifyChallenge(context.Background(), mfa.VerifyChallengeOpts{
-		ChallengeID: sessions["your_token"].challengeID,
-		Code:        code,
-	})
-
-	if err != nil {
-		log.Printf("challengefailed: %s", err)
-		return
-	}
-
-	valid := verify.Valid
-	challenge := verify.Challenge
-	tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
-	this_response := VerifyResponse{valid, challenge}
-	if err := tmpl.Execute(w, this_response); err != nil {
-		log.Panic(err)
-	}
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(enrollResponse)
 }
 
 func main() {
@@ -131,6 +133,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	gob.Register([]Cookie{})
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.Parse()
@@ -139,10 +142,12 @@ func main() {
 
 	mfa.SetAPIKey(conf.APIKey)
 
-	router.Handle("/", http.FileServer(http.Dir("./static")))
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	router.HandleFunc("/", displayFactors)
+
+	router.HandleFunc("/enroll-factors", enrollFactor)
 	router.HandleFunc("/enroll-factor", enrollHandler)
-	router.HandleFunc("/challenge-factor", challengeFactor)
-	router.HandleFunc("/verify-factor", verifyFactor)
+	
 
 	if err := http.ListenAndServe(conf.Addr, router); err != nil {
 		log.Panic(err)
