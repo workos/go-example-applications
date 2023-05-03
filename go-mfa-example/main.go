@@ -95,7 +95,6 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		Type:        string(req.Type),
 		ID:          enrollResponse.ID,
 		Phone:       req.PhoneNumber,
-		Environment: 
 		CreatedAt:   enrollResponse.CreatedAt,
 		UpdatedAt:   enrollResponse.UpdatedAt,
 	}
