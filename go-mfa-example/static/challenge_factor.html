@@ -6,10 +6,7 @@
     <div class="logged_in_nav">
       <div class="flex">
         <div>
-          <img
-            src="../public/images/workos-logo-with-text.png"
-            alt="workos logo"
-          />
+          <img src="/static/images/workos_logo_new.png" alt="workos logo" />
         </div>
       </div>
       <div>
@@ -59,7 +56,7 @@
           <div class="flex-column"></div>
           <div class="flex-column">
             <div>
-              <form method="POST" action="/verify_factor">
+              <form method="POST" action="/verify-factor?id={{ . }}">
                 <div class="flex_column">
                   <div class="flex form-wrap">
                     <input

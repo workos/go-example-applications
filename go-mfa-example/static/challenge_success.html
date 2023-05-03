@@ -2,7 +2,6 @@
   <head>
     <link rel="stylesheet" href="./static/stylesheets/style.css" />
   </head>
-
   <body class="container_success">
     <div class="logged_in_nav">
       <div class="flex">
@@ -54,37 +53,25 @@
       </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
-          <div class="flex space-between width-40vw">
+          <div class="flex-column"></div>
+          <div class="flex-column">
             <div>
-              <h2>Current MFA Factors</h2>
-            </div>
-            <div class="flex space-between">
-              <a href="/enroll-factors">
-                <button class="button button-outline button-sm">
-                  Enroll New Factor
-                </button>
-              </a>
-              <a href="/clear-session">
-                <button class="button button-outline button-sm">
-                  Clear Factors
-                </button>
-              </a>
+              {{ if .Valid }}
+              <h1>Challenge Successful!</h1>
+              {{ else }}
+              <h1>Challenge Unsuccessful!</h1>
+              {{ end }}
+              <p>User Verified: {{ .Valid }}</p>
+              {{ if .Valid }}
+              <p>Factor ID: {{ .Challenge.ID }}</p>
+              <p>Created At: {{ .Challenge.CreatedAt }}</p>
+              <p>Expires At: {{ .Challenge.ExpiresAt }}</p>
+              {{ end }}
             </div>
           </div>
-        </div>
-        <div class="flex-column">
-          {{ if . }} {{ range . }}
-          <div class="width-40vw">
-            <a href="/factor-detail?id={{ .ID }}" class="button login_button"
-              >{{.Type}} | {{ .ID }}
-            </a>
-          </div>
-
-          {{ end }} {{ else }}
-          <div class="mt-20 card width-40vw">
-            <p style="text-align: center; color: gray">No Current Factors</p>
-          </div>
-          {{ end }}
+          <a href="/"
+            ><button class="button button-sm m-top-20">Go Back Home</button></a
+          >
         </div>
       </div>
     </div>

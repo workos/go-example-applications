@@ -6,10 +6,7 @@
     <div class="logged_in_nav">
       <div class="flex">
         <div>
-          <img
-            src="../public/images/workos-logo-with-text.png"
-            alt="workos logo"
-          />
+          <img src="/static/images/workos_logo_new.png" alt="workos logo" />
         </div>
       </div>
       <div>
@@ -162,6 +159,7 @@
     }
 
     smsSubmitButton.addEventListener("click", function () {
+      event.preventDefault();
       fetch("/enroll-factor", {
         method: "POST",
         headers: {
@@ -171,10 +169,13 @@
           type: "sms",
           phone_number: phoneNumber.value,
         }),
+      }).then(() => {
+        window.location.replace("/");
       });
     });
 
     totpSubmitButton.addEventListener("click", function () {
+      event.preventDefault();
       fetch("/enroll-factor", {
         method: "POST",
         headers: {
