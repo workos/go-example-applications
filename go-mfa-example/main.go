@@ -226,7 +226,7 @@ func main() {
 
 	gob.Register([]Cookie{})
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
-	flag.StringVar(&conf.Addr, "addr", ":8050", "The server addr.")
+	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.Parse()
 
 	log.Printf("launching mfa demo with configuration: %+v", conf)
