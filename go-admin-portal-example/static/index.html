@@ -1,28 +1,73 @@
 <html>
-    <head>
-        <link rel="stylesheet" href="/stylesheets/style.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
-    </head>
-    <body class="container_login">
-        <div class='flex_column'>
-            <div class="flex heading_div">
-                <img src="/images/workos_logo_new.png" alt="workos logo">
-            </div>
+  <head>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Inter"
+    />
+  </head>
 
-            <h2>Go Admin Portal Example App</h2>
-            <form method="POST" action="/provision-enterprise">
-                <div class='flex_column'>
-                    <div>
-                        <input type="text" placeholder='Enter Your Organization Name to Provision' id="org" name="org" class="text_input" required>
-                    </div>
-                    <div>
-                        <input type="text" placeholder='Enter a Space Separated List of Domains Used By the Org' id="domain" name="domain" class="text_input text_input_2" required>
-                    </div>
-                    <div>
-                        <button type="submit" class="button">Create Organization and Log In</button>
-                    </div>
-                </div>
-            </form>
+  <body class="height-100vh">
+    <div class="logged_in_nav">
+      <div class="flex">
+        <div>
+          <img src="/images/workos_logo_new.png" alt="workos logo" />
         </div>
-    </body>
+      </div>
+      <div class="flex">
+        <a href="https://workos.com/docs" target="_blank"
+          ><button class="button nav-item">Documentation</button></a
+        >
+        <a href="https://workos.com/docs/reference" target="_blank"
+          ><button class="button nav-item">API Reference</button></a
+        >
+        <a href="https://workos.com/blog" target="_blank"
+          ><button class="button nav-item blog-nav-button">Blog</button></a
+        >
+        <a href="https://workos.com/" target="_blank"
+          ><button class="button button-outline">WorkOS</button></a
+        >
+      </div>
+    </div>
+    <div class="flex flex_column height-80vh">
+      <div class="flex height-40vh">
+        <div class="card width-335">
+          <form method="POST" action="/provision-enterprise">
+            <div class="flex_column">
+              <div>
+                <span>Admin Portal Example</span>
+              </div>
+              <hr style="width: 100%; margin-top: 15px; margin-bottom: 20px" />
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter name of Organization"
+                  id="org"
+                  name="org"
+                  class="text_input"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter domains (space separated)"
+                  id="domain"
+                  name="domain"
+                  class="text_input text_input_2"
+                  required
+                />
+              </div>
+              <br />
+              <div>
+                <button type="submit" class="button">
+                  Create Organization and Log In
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
