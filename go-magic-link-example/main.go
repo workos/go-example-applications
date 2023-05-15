@@ -30,11 +30,13 @@ func main() {
 		Addr     string
 		APIKey   string
 		ClientID string
+		RedirectURI string
 	}
 
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.StringVar(&conf.ClientID, "client-id", os.Getenv("WORKOS_CLIENT_ID"), "The WorkOS client id.")
+	flag.StringVar(&conf.RedirectURI, "redirect-uri", os.Getenv("WORKOS_REDIRECT_URI"), "The WorkOS REDIRECT id.")
 
 	log.Printf("launching passwordless demo with configuration: %+v", conf)
 
@@ -53,6 +55,7 @@ func main() {
 		session, err := passwordless.CreateSession(context.Background(), passwordless.CreateSessionOpts{
 			Email: email,
 			Type:  passwordless.MagicLink,
+			RedirectURI: conf.RedirectURI,
 		})
 
 		if err != nil {
