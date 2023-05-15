@@ -38,7 +38,9 @@
               <tr>
                 <td class="ta-left">SSO</td>
                 <td>
-                  <a class="button button-outline" href="/sso-admin-portal"
+                  <a
+                    class="button button-outline"
+                    href="/admin-portal?id={{ .ID }}&intent=SSO"
                     ><i icon-name="settings-2" class="stroke_width=1"></i
                   ></a>
                 </td>
@@ -46,7 +48,9 @@
               <tr>
                 <td class="ta-left">Directory Sync</td>
                 <td>
-                  <a class="button button-outline" href="/dsync-admin-portal"
+                  <a
+                    class="button button-outline"
+                    href="/admin-portal?id={{ .ID }}&intent=DSync"
                     ><i icon-name="settings-2" class="stroke_width=1"></i
                   ></a>
                 </td>
@@ -56,7 +60,7 @@
                 <td>
                   <a
                     class="button button-outline"
-                    href="/audit-logs-admin-portal"
+                    href="/admin-portal?id={{ .ID }}&intent=AuditLogs"
                     ><i icon-name="settings-2" class="stroke_width=1"></i
                   ></a>
                 </td>
@@ -66,7 +70,7 @@
                 <td>
                   <a
                     class="button button-outline"
-                    href="/log-stream-admin-portal"
+                    href="/admin-portal?id={{ .ID }}&intent=LogStreams"
                     ><i icon-name="settings-2" class="stroke_width=1"></i
                   ></a>
                 </td>
