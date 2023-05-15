@@ -2,6 +2,7 @@
   <head>
     <link rel="stylesheet" href="./static/stylesheets/style.css" />
   </head>
+
   <body class="container_success">
     <div class="logged_in_nav">
       <div class="flex">
@@ -25,39 +26,13 @@
       </div>
     </div>
     <div class="flex">
-      <div class="logged_in_div_left">
-        <div class="title-text">
-          <h1>Your app,</h1>
-          <h2 class="home-hero-gradient">Enterprise Ready</h2>
-        </div>
-        <div class="title-subtext">
-          <p>
-            Start selling to enterprise customers with just a few lines of code.
-          </p>
-          <p>
-            Implement features like single sign-on in minutes instead of months.
-          </p>
-        </div>
-        <div class="flex success-buttons">
-          <a href="https://workos.com/signup" target="_blank"
-            ><button class="button">Get Started</button></a
-          >
-          <a
-            href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry"
-            target="_blank"
-            ><button class="button button-outline sales-button">
-              Contact Sales
-            </button></a
-          >
-        </div>
-      </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
           <div class="flex space_between">
-            <div class="factor_card">
+            <div class="factor_card height-250px">
               <h2>Enroll SMS Factor</h2>
               <form method="POST">
-                <div class="flex-column">
+                <div class="flex">
                   <div class="flex">
                     <input
                       class="text_input"
@@ -67,7 +42,9 @@
                       placeholder="Phone Number"
                     />
                   </div>
-                  <div class="flex m-top-20">
+                </div>
+                <div class="flex">
+                  <div>
                     <button
                       type="submit"
                       name="type"
@@ -82,7 +59,8 @@
                 </div>
               </form>
             </div>
-            <div class="factor_card">
+
+            <div class="factor_card height-250px">
               <h2>Enroll TOTP Factor</h2>
               <div>
                 <div class="flex-column">
@@ -104,7 +82,9 @@
                       placeholder="User Email"
                     />
                   </div>
-                  <div class="flex m-top-20">
+                </div>
+                <div class="flex">
+                  <div>
                     <button
                       value="totp"
                       id="totp-factor-submit-btn"
@@ -127,6 +107,7 @@
       </div>
     </div>
   </body>
+
   <script>
     const phoneNumber = document.getElementById("phone_number");
     const totpIssuer = document.getElementById("totp_issuer");
