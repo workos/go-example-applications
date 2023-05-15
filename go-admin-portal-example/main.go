@@ -14,12 +14,6 @@ import (
 	"github.com/workos/workos-go/v2/pkg/portal"
 )
 
-type Profile struct {
-	First_name  string
-	Last_name   string
-	Raw_profile string
-}
-
 func ProvisionEnterprise(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		log.Panic(err)
