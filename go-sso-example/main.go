@@ -28,8 +28,11 @@ type Profile struct {
 }
 
 func signin(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
+	session, err := store.Get(r, "cookie-name")
 
+	if err != nil {
+		fmt.Println(err)
+	}
 	// Check if user is authenticated
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Redirect(w, r, "/signin", http.StatusSeeOther)
