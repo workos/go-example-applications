@@ -26,38 +26,13 @@
       </div>
     </div>
     <div class="flex">
-      <div class="logged_in_div_left">
-        <div class="title-text">
-          <h1>Your app,</h1>
-          <h2 class="home-hero-gradient">Enterprise Ready</h2>
-        </div>
-        <div class="title-subtext">
-          <p>
-            Start selling to enterprise customers with just a few lines of code.
-          </p>
-          <p>
-            Implement features like single sign-on in minutes instead of months.
-          </p>
-        </div>
-        <div class="flex success-buttons">
-          <a href="https://workos.com/signup" target="_blank"
-            ><button class="button">Get Started</button></a
-          >
-          <a
-            href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry"
-            target="_blank"
-            ><button class="button button-outline sales-button">
-              Contact Sales
-            </button></a
-          >
-        </div>
-      </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
-          <div class="flex space-between width-40vw">
-            <div>
-              <h2>Current MFA Factors</h2>
+          <div class="flex space-between width-725px">
+            <div class="flex">
+              <h2>MFA Factors</h2>
             </div>
+
             <div class="flex space-between">
               <a href="/enroll-factors">
                 <button class="button button-outline button-sm">
@@ -72,15 +47,29 @@
             </div>
           </div>
         </div>
-        <div class="flex-column">
-          {{ if . }} {{ range . }}
-          <div class="width-40vw">
-            <a href="/factor-detail?id={{ .ID }}" class="button login_button"
-              >{{.Type}} | {{ .ID }}
-            </a>
-          </div>
 
-          {{ end }} {{ else }}
+        <div>
+          {{ if . }}
+          <table class="width-725px">
+            <tr>
+              <th>Type</th>
+              <th>ID</th>
+              <th>View Details</th>
+            </tr>
+            {{ range .}}
+            <tr>
+              <td>{{ .Type }}</td>
+              <td>{{ .ID }}</td>
+              <td>
+                <a
+                  class="button button-outline"
+                  href="/factor-detail?id={{ .ID }}"
+                  ><i icon-name="settings-2" class="stroke_width=1"></i
+                ></a>
+              </td>
+            </tr>
+            {{ end }} {{ else }}
+          </table>
           <div class="mt-20 card width-40vw">
             <p style="text-align: center; color: gray">No Current Factors</p>
           </div>
@@ -89,4 +78,8 @@
       </div>
     </div>
   </body>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </html>

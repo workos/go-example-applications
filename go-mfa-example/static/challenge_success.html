@@ -2,6 +2,7 @@
   <head>
     <link rel="stylesheet" href="./static/stylesheets/style.css" />
   </head>
+
   <body class="container_success">
     <div class="logged_in_nav">
       <div class="flex">
@@ -25,53 +26,33 @@
       </div>
     </div>
     <div class="flex">
-      <div class="logged_in_div_left">
-        <div class="title-text">
-          <h1>Your app,</h1>
-          <h2 class="home-hero-gradient">Enterprise Ready</h2>
-        </div>
-        <div class="title-subtext">
-          <p>
-            Start selling to enterprise customers with just a few lines of code.
-          </p>
-          <p>
-            Implement features like single sign-on in minutes instead of months.
-          </p>
-        </div>
-        <div class="flex success-buttons">
-          <a href="https://workos.com/signup" target="_blank"
-            ><button class="button">Get Started</button></a
-          >
-          <a
-            href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry"
-            target="_blank"
-            ><button class="button button-outline sales-button">
-              Contact Sales
-            </button></a
-          >
-        </div>
-      </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
-          <div class="flex-column"></div>
           <div class="flex-column">
-            <div>
-              {{ if .Valid }}
-              <h1>Challenge Successful!</h1>
-              {{ else }}
-              <h1>Challenge Unsuccessful!</h1>
-              {{ end }}
-              <p>User Verified: {{ .Valid }}</p>
-              {{ if .Valid }}
-              <p>Factor ID: {{ .Challenge.ID }}</p>
-              <p>Created At: {{ .Challenge.CreatedAt }}</p>
-              <p>Expires At: {{ .Challenge.ExpiresAt }}</p>
-              {{ end }}
+            <div class="flex space-between">
+              <div>
+                <h2>User Verified: {{ .Valid}}</h2>
+              </div>
+              <div>
+                <a href="/"><button class="button">Go Back Home</button></a>
+              </div>
             </div>
+            {{ if .Valid }}
+            <table class="width-725px">
+              <tr>
+                <th>ID</th>
+                <th>Created At</th>
+                <th>Expires At</th>
+              </tr>
+
+              <tr>
+                <td>{{ .Challenge.ID }}</td>
+                <td>{{ .Challenge.CreatedAt }}</td>
+                <td>{{ .Challenge.ExpiresAt }}</td>
+              </tr>
+            </table>
+            {{ end }}
           </div>
-          <a href="/"
-            ><button class="button button-sm m-top-20">Go Back Home</button></a
-          >
         </div>
       </div>
     </div>

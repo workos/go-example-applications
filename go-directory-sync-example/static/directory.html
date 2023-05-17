@@ -1,6 +1,10 @@
 <html>
   <head>
     <link rel="stylesheet" href="/styles/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Inter"
+    />
   </head>
 
   <body class="container_success">
@@ -26,43 +30,17 @@
       </div>
     </div>
     <div class="flex">
-      <div class="logged_in_div_left">
-        <div class="title-text">
-          <h1>Your app,</h1>
-          <h2 class="home-hero-gradient">Enterprise Ready</h2>
-        </div>
-        <div class="title-subtext">
-          <p>
-            Start selling to enterprise customers with just a few lines of code.
-          </p>
-          <p>
-            Implement features like single sign-on in minutes instead of months.
-          </p>
-        </div>
-        <div class="flex success-buttons">
-          <a href="https://workos.com/signup" target="_blank"
-            ><button class="button">Get Started</button></a
-          >
-          <a
-            href="mailto:sales@workos.com?subject=WorkOS Sales Inquiry"
-            target="_blank"
-            ><button class="button button-outline sales-button">
-              Contact Sales
-            </button></a
-          >
-        </div>
-      </div>
       <div class="logged_in_div_right">
         <div class="flex_column">
-          <h2>Raw Directory Object Details</h2>
-          <div class="text_box">
-            <pre class="prettyprint">
-                        {{ .Directory }}
+          <h2>Directory Details</h2>
+          <div>
+            <pre id="noborder" class="prettyprint noborder">
+                      {{ .Directory }}
                     </pre
             >
           </div>
         </div>
-        <div class="flex directory-buttons">
+        <div class="flex width-440px space-between">
           <div class="flex">
             <a href="/users?id={{ .ID }}"
               ><button class="button">Users</button></a

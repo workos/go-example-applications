@@ -34,11 +34,6 @@ type Directories struct {
 	After string
 }
 
-// A helper function for template
-func mod(i, j int) bool {
-	return i%j ==0
-}
-
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
     WriteBufferSize: 1024,
@@ -161,7 +156,7 @@ func handleDirectory(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUsers(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.New("users.html").Funcs(template.FuncMap{"mod": mod}).ParseFiles("./static/users.html")
+	tmpl, err := template.New("users.html").ParseFiles("./static/users.html")
 	id := r.URL.Query().Get("id")
 
 	if err != nil {
@@ -197,7 +192,7 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 
 func handleGroups(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("groups.html").Funcs(template.FuncMap{"mod": mod}).ParseFiles("./static/groups.html")
+	tmpl, err := template.New("groups.html").ParseFiles("./static/groups.html")
 	id := r.URL.Query().Get("id")
 
 	if err != nil {
@@ -245,7 +240,6 @@ func main() {
 
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
-	flag.StringVar(&conf.Directory, "directory", os.Getenv("WORKOS_DIRECTORY_ID"), "The WorkOS directory id.")
 	flag.Parse()
 
 	log.Printf("launching directory sync demo with configuration: %+v", conf)

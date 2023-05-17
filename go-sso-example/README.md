@@ -1,12 +1,15 @@
 # Go SSO Example
+
 An example Go application demonstrating how to use the [WorkOS Go SDK](https://github.com/workos/workos-go) to authenticate users via SSO.
 
 ## Prerequisites
+
 - Go
 
 ## Go Project Setup
 
 1. Clone this git repository using your preferred secure method (HTTPS or SSH).
+
    ```bash
    # HTTPS
    git clone https://github.com/workos/go-example-applications.git
@@ -20,23 +23,26 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
    ```
 
 2. Navigate to the cloned repository.
+
    ```bash
    cd go-example-applications/go-sso-example
    ```
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
+
    - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
    - Your [SSO-specific, WorkOS Project ID](https://dashboard.workos.com/configuration)
    - Your [Redirect URI](https://workos.com/docs/sso/guide/set-redirect-uri)
 
-
 4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the values from step 4:
+
    - WORKOS_API_KEY=xxx
    - WORKOS_CLIENT_ID=xxx
    - WORKOS_REDIRECT_URI=xxx
    - WORKOS_CONNECTION=xxx
 
 5. The final setup step is to start the server.
+
    ```bash
    go run .
    ```
@@ -44,7 +50,6 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
    Navigate to `localhost:8000` in your web browser. You should see a "Login" button. If you click this link, you'll be redirected to an HTTP `404` page because we haven't set up SSO yet!
 
    You can stop the local server for now by entering `CTRL + c` on the command-line.
-
 
 ## SSO Setup with WorkOS
 
