@@ -35,12 +35,13 @@ var conf struct {
 	Connection  string
 	Provider    string
 }
+
 func loadEnvVariables() {
 	err := godotenv.Load()
 	if err != nil {
-	   log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
- 
+
 	// Assign the environment variables to the `conf` struct fields
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
@@ -53,27 +54,13 @@ func loadEnvVariables() {
 	log.Printf("launching sso demo with configuration: %+v", conf)
 
 	sso.Configure(conf.APIKey, conf.ClientID)
- }
- 
- func init() {
+}
+
+func init() {
 	loadEnvVariables()
- }
+}
 
 func signin(w http.ResponseWriter, r *http.Request) {
-	func signin(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, sessionName)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Redirect(w, r, "/signin", http.StatusSeeOther)
-		return
-	}
-
-	http.Redirect(w, r, "/logged_in", http.StatusSeeOther)
-}
 	session, err := store.Get(r, "cookie-name")
 	if err != nil {
 		log.Println(err)
@@ -104,7 +91,7 @@ func getAuthorizationURL(loginType string) (*url.URL, error) {
 	}
 
 	if loginType == "saml" {
-		opts.Connection =  conf.Connection
+		opts.Connection = conf.Connection
 	} else {
 		opts.Provider = sso.ConnectionType(loginType)
 	}
@@ -154,8 +141,8 @@ func callback(w http.ResponseWriter, r *http.Request) {
 
 	thisProfile := Profile{
 		session.Values["first_name"].(string),
-    session.Values["last_name"].(string),
-    string(session.Values["raw_profile"].([]byte)),
+		session.Values["last_name"].(string),
+		string(session.Values["raw_profile"].([]byte)),
 	}
 
 	if err := tmpl.Execute(w, thisProfile); err != nil {
@@ -183,7 +170,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
 
 	router.HandleFunc("/login", login)
 	router.HandleFunc("/callback", callback)
