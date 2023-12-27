@@ -31,7 +31,7 @@ An example Golang application demonstrating how to use the [WorkOS Golang SDK](h
 
 4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the value from step 3:
    - WORKOS_API_KEY=xxx
-     -WORKOS_CLIENT_ID=xxx
+   - WORKOS_CLIENT_ID=xxx
 
 ## Start the server
 

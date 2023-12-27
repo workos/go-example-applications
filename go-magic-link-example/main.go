@@ -11,8 +11,8 @@ import (
 	"text/template"
 
 	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/v2/pkg/passwordless"
-	"github.com/workos/workos-go/v2/pkg/sso"
+	"github.com/workos/workos-go/v3/pkg/passwordless"
+	"github.com/workos/workos-go/v3/pkg/sso"
 )
 
 type Profile struct {
@@ -27,9 +27,9 @@ func main() {
 	}
 
 	var conf struct {
-		Addr     string
-		APIKey   string
-		ClientID string
+		Addr        string
+		APIKey      string
+		ClientID    string
 		RedirectURI string
 	}
 
@@ -53,8 +53,8 @@ func main() {
 		email := r.Form["email"][0]
 
 		session, err := passwordless.CreateSession(context.Background(), passwordless.CreateSessionOpts{
-			Email: email,
-			Type:  passwordless.MagicLink,
+			Email:       email,
+			Type:        passwordless.MagicLink,
 			RedirectURI: conf.RedirectURI,
 		})
 
