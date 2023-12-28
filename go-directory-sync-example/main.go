@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -9,17 +10,16 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"encoding/json"
 
-	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/v2/pkg/directorysync"
-	"github.com/workos/workos-go/v2/pkg/webhooks"
-	"github.com/workos/workos-go/v2/pkg/common"
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
+	"github.com/workos/workos-go/v3/pkg/common"
+	"github.com/workos/workos-go/v3/pkg/directorysync"
+	"github.com/workos/workos-go/v3/pkg/webhooks"
 )
 
 type Directory struct {
-	ID string
+	ID        string
 	Directory string
 }
 
@@ -28,15 +28,15 @@ type Users struct {
 }
 
 type Directories struct {
-	Data []directorysync.Directory
+	Data     []directorysync.Directory
 	Metadata common.ListMetadata
-	Before string
-	After string
+	Before   string
+	After    string
 }
 
 var upgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 var conn *websocket.Conn
@@ -44,21 +44,20 @@ var conn *websocket.Conn
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-    // upgrade this connection to a WebSocket connection
-    ws, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        log.Println(err)
-    }
+	// upgrade this connection to a WebSocket connection
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
 
-    log.Println("Client Connected")
+	log.Println("Client Connected")
 
 	conn = ws
 }
 
-
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/webhooks.html"))
-	
+
 	//Validate the Webhook
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -77,13 +76,13 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, "")
 
 	// send the body to the websocket connection if it exists
-    if conn != nil {
+	if conn != nil {
 		err = conn.WriteMessage(1, []byte(body))
-    	if err != nil {
-        	log.Println(err)
-    	}
-	} 
-	
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
 }
 
 func handleDirectories(w http.ResponseWriter, r *http.Request) {
@@ -97,8 +96,8 @@ func handleDirectories(w http.ResponseWriter, r *http.Request) {
 		context.Background(),
 		directorysync.ListDirectoriesOpts{
 			Before: before,
-			After: after,
-			Limit: 5,
+			After:  after,
+			Limit:  5,
 		},
 	)
 
@@ -112,7 +111,7 @@ func handleDirectories(w http.ResponseWriter, r *http.Request) {
 
 	before = list.ListMetadata.Before
 	after = list.ListMetadata.After
-	
+
 	data := Directories{list.Data, list.ListMetadata, before, after}
 
 	// Render the template with the directories
@@ -120,7 +119,6 @@ func handleDirectories(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDirectory(w http.ResponseWriter, r *http.Request) {
-
 
 	tmpl := template.Must(template.ParseFiles("./static/directory.html"))
 	id := r.URL.Query().Get("id")
@@ -139,7 +137,7 @@ func handleDirectory(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	
+
 	b, err := json.MarshalIndent(dir, "", "    ")
 	if err != nil {
 		log.Printf("encoding directory failed: %s", err)
@@ -151,7 +149,7 @@ func handleDirectory(w http.ResponseWriter, r *http.Request) {
 	newstring := string(b)
 	data := Directory{dir.ID, newstring}
 
-	// Render the template with the directory 
+	// Render the template with the directory
 	tmpl.Execute(w, data)
 }
 
@@ -166,7 +164,7 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	
+
 	// Get Users
 	list, err := directorysync.ListUsers(
 		context.Background(),
@@ -189,7 +187,6 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-
 func handleGroups(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("groups.html").ParseFiles("./static/groups.html")
@@ -202,7 +199,7 @@ func handleGroups(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	
+
 	// Get Groups
 	list, err := directorysync.ListGroups(
 		context.Background(),
@@ -237,7 +234,6 @@ func main() {
 		Directory string
 	}
 
-
 	flag.StringVar(&conf.Addr, "addr", ":8000", "The server addr.")
 	flag.StringVar(&conf.APIKey, "api-key", os.Getenv("WORKOS_API_KEY"), "The WorkOS API key.")
 	flag.Parse()
@@ -255,10 +251,10 @@ func main() {
 
 	// render stylesheet and images
 	styles := http.FileServer(http.Dir("./static/stylesheets"))
-    http.Handle("/styles/", http.StripPrefix("/styles/", styles))
+	http.Handle("/styles/", http.StripPrefix("/styles/", styles))
 
 	images := http.FileServer(http.Dir("./static/images"))
-    http.Handle("/images/", http.StripPrefix("/images/", images))
+	http.Handle("/images/", http.StripPrefix("/images/", images))
 
 	if err := http.ListenAndServe(conf.Addr, nil); err != nil {
 		log.Panic(err)

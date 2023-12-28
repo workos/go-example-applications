@@ -6,36 +6,35 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"text/template"
 	"time"
-	"strconv"
 
 	"github.com/joho/godotenv"
 
 	"github.com/gorilla/sessions"
-	"github.com/workos/workos-go/v2/pkg/auditlogs"
-	"github.com/workos/workos-go/v2/pkg/organizations"
-	"github.com/workos/workos-go/v2/pkg/portal"
-	"github.com/workos/workos-go/v2/pkg/common"
-	
+	"github.com/workos/workos-go/v3/pkg/auditlogs"
+	"github.com/workos/workos-go/v3/pkg/common"
+	"github.com/workos/workos-go/v3/pkg/organizations"
+	"github.com/workos/workos-go/v3/pkg/portal"
 )
 
 var router = http.NewServeMux()
 var key = []byte("super-secret-key")
 var store = sessions.NewCookieStore(key)
 
-type SendEventData struct{
-	Name string
-	ID   string
+type SendEventData struct {
+	Name       string
+	ID         string
 	RangeStart string
-	RangeEnd string
+	RangeEnd   string
 }
 
 type Organizations struct {
-	Data []organizations.Organization
+	Data     []organizations.Organization
 	Metadata common.ListMetadata
-	Before string
-	After string
+	Before   string
+	After    string
 }
 
 func init() {
@@ -45,8 +44,7 @@ func init() {
 	}
 }
 
-
-// Displays Organizations 
+// Displays Organizations
 func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/index.html"))
 
@@ -57,8 +55,8 @@ func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 		context.Background(),
 		organizations.ListOrganizationsOpts{
 			Before: before,
-			After: after,
-			Limit: 5,
+			After:  after,
+			Limit:  5,
 		},
 	)
 
@@ -74,7 +72,6 @@ func handleOrganizations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	data := Organizations{list.Data, list.ListMetadata, before, after}
 
 	// Render the template with the organizations
@@ -164,7 +161,7 @@ func sendEvents(w http.ResponseWriter, r *http.Request) {
 	rangeStart := currentTime.AddDate(0, 0, -30)
 
 	data := SendEventData{session.Values["org_name"].(string), session.Values["org_id"].(string), rangeStart.Format(time.RFC3339), currentTime.Format(time.RFC3339)}
-	
+
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Panic(err)
 	}
@@ -237,37 +234,37 @@ func sessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Generates or exports CSV by form event 
+// Generates or exports CSV by form event
 func exportEvents(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
-	eventType  := r.FormValue("event")
+	eventType := r.FormValue("event")
 
 	if eventType == "access_csv" {
 		export, err := auditlogs.GetExport(context.Background(), auditlogs.GetExportOpts{
 			ExportID: session.Values["export_id"].(string),
 		})
-	
+
 		if err != nil {
 			fmt.Println("Error exporting events:", err)
 		}
-	
+
 		http.Redirect(w, r, export.URL, http.StatusSeeOther)
 	} else {
 		rangeStart := r.FormValue("range-start")
 		rangeEnd := r.FormValue("range-end")
 		targets := r.FormValue("filter-targets")
-		opts := auditlogs.CreateExportOpts{ 
+		opts := auditlogs.CreateExportOpts{
 			OrganizationID: session.Values["org_id"].(string),
 			RangeStart:     rangeStart,
 			RangeEnd:       rangeEnd,
-			Targets:  []string{targets},
-		 }
-		if actors := r.FormValue("filter-actors"); actors != "" {
-		  opts.Actors = []string{actors}
+			Targets:        []string{targets},
 		}
-		if actions:= r.FormValue("filter-actions"); actions != "" {
+		if actors := r.FormValue("filter-actors"); actors != "" {
+			opts.Actors = []string{actors}
+		}
+		if actions := r.FormValue("filter-actions"); actions != "" {
 			opts.Actions = []string{actions}
-		  }
+		}
 
 		export, err := auditlogs.CreateExport(context.Background(), opts)
 
@@ -276,7 +273,6 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Error creating export:", err)
 		}
 
-		
 		session.Values["export_id"] = export.ID
 
 		if err := session.Save(r, w); err != nil {
@@ -288,10 +284,10 @@ func exportEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 // Generates an Admin Portal Link by Intent
-func events(w http.ResponseWriter, r *http.Request){
+func events(w http.ResponseWriter, r *http.Request) {
 	intent := r.URL.Query().Get("intent")
 	session, _ := store.Get(r, "session-name")
-	
+
 	link, err := portal.GenerateLink(
 		context.Background(),
 		portal.GenerateLinkOpts{
@@ -324,7 +320,6 @@ func main() {
 	router.HandleFunc("/send-event", sendEvent)
 	router.HandleFunc("/export-events", exportEvents)
 	router.HandleFunc("/logout", logout)
-
 
 	if err := http.ListenAndServe(":8000", router); err != nil {
 		log.Panic(err)

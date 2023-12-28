@@ -1,19 +1,20 @@
 package main
 
 import (
+	"context"
+	"encoding/gob"
+	"encoding/json"
 	"flag"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
-	"strings"
 	"os"
-	"fmt"
-	"encoding/json"
-	"encoding/gob"
-	"context"
-	"html/template"
-	"github.com/joho/godotenv"
-	"github.com/workos/workos-go/v2/pkg/mfa"
+	"strings"
+
 	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
+	"github.com/workos/workos-go/v3/pkg/mfa"
 )
 
 var router = http.NewServeMux()
@@ -26,23 +27,22 @@ var conf struct {
 }
 
 type Cookie struct {
-	Type        string
-	ID			string
-	Phone       string
-	CreatedAt   string
-	UpdatedAt   string
+	Type      string
+	ID        string
+	Phone     string
+	CreatedAt string
+	UpdatedAt string
 }
 
 type Factor struct {
-    Type  string
-    ID string
+	Type string
+	ID   string
 }
-
 
 func displayFactors(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/index.html"))
 	session, err := store.Get(r, "cookie-name")
-	
+
 	if err != nil {
 		fmt.Printf("Error getting session: %v\n", err)
 	}
@@ -61,42 +61,41 @@ func enrollFactor(w http.ResponseWriter, r *http.Request) {
 }
 
 type EnrollRequest struct {
-    Type        mfa.FactorType `json:"type"`
-    TOTPIssuer  string         `json:"issuer"`
-    TOTPUser    string         `json:"user"`
-	PhoneNumber 		string			`json:"phone_number"`
+	Type        mfa.FactorType `json:"type"`
+	TOTPIssuer  string         `json:"issuer"`
+	TOTPUser    string         `json:"user"`
+	PhoneNumber string         `json:"phone_number"`
 }
 
 func enroll(enrollOpts mfa.EnrollFactorOpts) (mfa.Factor, error) {
-    enroll, err := mfa.EnrollFactor(context.Background(), enrollOpts)
-    return enroll, err
+	enroll, err := mfa.EnrollFactor(context.Background(), enrollOpts)
+	return enroll, err
 }
 
 func enrollHandler(w http.ResponseWriter, r *http.Request) {
-    var req EnrollRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-       fmt.Println(err)
-    }
+	var req EnrollRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Println(err)
+	}
 
-    enrollOpts := mfa.EnrollFactorOpts{
-        Type:        req.Type,
-        TOTPIssuer:  req.TOTPIssuer,
-        TOTPUser:    req.TOTPUser,
-        PhoneNumber: req.PhoneNumber,
-    }
+	enrollOpts := mfa.EnrollFactorOpts{
+		Type:        req.Type,
+		TOTPIssuer:  req.TOTPIssuer,
+		TOTPUser:    req.TOTPUser,
+		PhoneNumber: req.PhoneNumber,
+	}
 
-
-    enrollResponse, err := enroll(enrollOpts)
-    if err != nil {
-        fmt.Println(err)
-    }
+	enrollResponse, err := enroll(enrollOpts)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	cookie := Cookie{
-		Type:        string(req.Type),
-		ID:          enrollResponse.ID,
-		Phone:       req.PhoneNumber,
-		CreatedAt:   enrollResponse.CreatedAt,
-		UpdatedAt:   enrollResponse.UpdatedAt,
+		Type:      string(req.Type),
+		ID:        enrollResponse.ID,
+		Phone:     req.PhoneNumber,
+		CreatedAt: enrollResponse.CreatedAt,
+		UpdatedAt: enrollResponse.UpdatedAt,
 	}
 
 	// Get the session
@@ -111,21 +110,21 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 		factorsInterface = []Cookie{}
 	}
 
-factors, _ := factorsInterface.([]Cookie)
+	factors, _ := factorsInterface.([]Cookie)
 
-// Append the new cookie to the factors array
-factors = append(factors, cookie)
+	// Append the new cookie to the factors array
+	factors = append(factors, cookie)
 
-// Set the updated factors slice back into the session
-session.Values["factors"] = factors
+	// Set the updated factors slice back into the session
+	session.Values["factors"] = factors
 
 	err = session.Save(r, w)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(enrollResponse)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(enrollResponse)
 }
 
 func factorDetail(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +132,7 @@ func factorDetail(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
 	session, err := store.Get(r, "cookie-name")
-	
+
 	if err != nil {
 		fmt.Printf("Error getting session: %v\n", err)
 	}
@@ -157,7 +156,7 @@ func factorDetail(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func challengeFactor (w http.ResponseWriter, r *http.Request) {
+func challengeFactor(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/challenge_factor.html"))
 	id := r.URL.Query().Get("id")
 	if err := r.ParseForm(); err != nil {
@@ -170,19 +169,19 @@ func challengeFactor (w http.ResponseWriter, r *http.Request) {
 		FactorID:    id,
 		SMSTemplate: smsMessage,
 	})
-	
+
 	if err != nil {
-		fmt.Println("Challenge err: %v\n", err)
+		fmt.Printf("Challenge err: %v\n", err)
 	}
 
 	tmpl.Execute(w, challenge.ID)
 
 }
 
-func verifyFactor (w http.ResponseWriter, r *http.Request) {
+func verifyFactor(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./static/challenge_success.html"))
 	id := r.URL.Query().Get("id")
-	
+
 	if err := r.ParseForm(); err != nil {
 		log.Panic(err)
 	}
@@ -205,7 +204,7 @@ func verifyFactor (w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, verify)
 }
 
-func clearSession (w http.ResponseWriter, r *http.Request) {
+func clearSession(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 
 	// Revoke users authentication
@@ -242,9 +241,6 @@ func main() {
 	router.HandleFunc("/challenge-factor", challengeFactor)
 	router.HandleFunc("/verify-factor", verifyFactor)
 	router.HandleFunc("/clear-session", clearSession)
-
-
-	
 
 	if err := http.ListenAndServe(conf.Addr, router); err != nil {
 		log.Panic(err)
