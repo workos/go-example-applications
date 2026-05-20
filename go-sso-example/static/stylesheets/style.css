@@ -311,6 +311,7 @@ h1 {
 
 .logged_in_nav img {
   height: 50px;
+  mix-blend-mode: multiply;
 }
 
 .nav-item {

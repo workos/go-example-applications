@@ -31,7 +31,7 @@
     </div>
     <div class="flex flex_column height-80vh">
       <div class="flex height-40vh">
-        <div class="card height-315 width-335">
+        <div class="card width-335">
           <form method="POST" action="/login" class="mb-0">
             <div class="flex_column">
               <div>
@@ -53,6 +53,14 @@
                 class="card login_button microsoft_button"
               >
                 <span>Microsoft OAuth</span>
+              </button>
+              <button
+                id="GitHub"
+                name="login_method"
+                value="GitHubOAuth"
+                class="card login_button"
+              >
+                <span>GitHub OAuth</span>
               </button>
               <button
                 id="SAML"
