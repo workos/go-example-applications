@@ -15,25 +15,8 @@ import (
 	"github.com/workos/workos-go/v3/pkg/sso"
 )
 
-var (
-	key    = []byte("super-secret-key")
-	store  = sessions.NewCookieStore(key)
-	router = http.NewServeMux()
-)
-
-type Profile struct {
-	First_name  string
-	Last_name   string
-	Raw_profile string
-}
-
-var conf struct {
-	Addr        string
-	APIKey      string
-	ClientID    string
-	RedirectURI string
-	Connection  string
-	Provider    string
+func init() {
+	loadEnvVariables()
 }
 
 func loadEnvVariables() {
@@ -51,13 +34,39 @@ func loadEnvVariables() {
 	flag.StringVar(&conf.Provider, "provider", "", "The OAuth provider used for the SSO connection.")
 	flag.Parse()
 
-	log.Printf("launching sso demo with configuration: %+v", conf)
+	log.Printf("launching sso demo: addr=%s client_id=%s redirect_uri=%s connection=%s provider=%s api_key=%s",
+		conf.Addr, conf.ClientID, conf.RedirectURI, conf.Connection, conf.Provider, redact(conf.APIKey))
 
 	sso.Configure(conf.APIKey, conf.ClientID)
 }
 
-func init() {
-	loadEnvVariables()
+var (
+	key    = []byte("super-secret-key")
+	store  = sessions.NewCookieStore(key)
+	router = http.NewServeMux()
+)
+
+type Profile struct {
+	FirstName  string
+	LastName   string
+	RawProfile string
+}
+
+var conf struct {
+	Addr        string
+	APIKey      string
+	ClientID    string
+	RedirectURI string
+	Connection  string
+	Provider    string
+	APIURL      string
+}
+
+func redact(s string) string {
+	if len(s) <= 8 {
+		return "***"
+	}
+	return s[:8] + "..."
 }
 
 func signin(w http.ResponseWriter, r *http.Request) {
@@ -133,16 +142,16 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	session.Values["authenticated"] = true
 	session.Values["first_name"] = profile.Profile.FirstName
 	session.Values["last_name"] = profile.Profile.LastName
-	session.Values["raw_profile"], _ = json.MarshalIndent(profile, "", "    ")
 
 	if err := session.Save(r, w); err != nil {
 		log.Panic(err)
 	}
 
+	raw, _ := json.MarshalIndent(profile, "", "    ")
 	thisProfile := Profile{
-		session.Values["first_name"].(string),
-		session.Values["last_name"].(string),
-		string(session.Values["raw_profile"].([]byte)),
+		FirstName:  profile.Profile.FirstName,
+		LastName:   profile.Profile.LastName,
+		RawProfile: string(raw),
 	}
 
 	if err := tmpl.Execute(w, thisProfile); err != nil {
@@ -155,9 +164,8 @@ func loggedin(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 
 	thisProfile := Profile{
-		session.Values["first_name"].(string),
-		session.Values["last_name"].(string),
-		string(session.Values["raw_profile"].([]byte)),
+		FirstName: session.Values["first_name"].(string),
+		LastName:  session.Values["last_name"].(string),
 	}
 
 	if err := tmpl.Execute(w, thisProfile); err != nil {

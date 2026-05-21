@@ -30,11 +30,10 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
 3. Obtain and make note of the following values. In the next step, these will be set as environment variables.
 
-   - Your [WorkOS API key](https://dashboard.workos.com/api-keys)
-   - Your [SSO-specific, WorkOS Project ID](https://dashboard.workos.com/configuration)
-   - Your [Redirect URI](https://workos.com/docs/sso/guide/set-redirect-uri)
+   - Your [WorkOS API key and Client ID](https://dashboard.workos.com/get-started)
+   - Your [Redirect URI](https://workos.com/docs/sso)
 
-4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the values from step 4:
+4. Create a new file called ".env" in the root of the project and add the following variables, replacing the xxx with the values from step 3:
 
    - WORKOS_API_KEY=xxx
    - WORKOS_CLIENT_ID=xxx
@@ -53,7 +52,7 @@ An example Go application demonstrating how to use the [WorkOS Go SDK](https://g
 
 ## SSO Setup with WorkOS
 
-Follow the [SSO authentication flow instructions](https://workos.com/docs/sso/guide/introduction) to set up an SSO connection.
+Follow the [SSO authentication flow instructions](https://workos.com/docs/sso) to set up an SSO connection.
 
 When you get to the step where you provide the `REDIRECT_URI` value, use [http://localhost:8000/callback].
 
