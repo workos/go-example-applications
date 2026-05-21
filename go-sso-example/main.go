@@ -42,7 +42,7 @@ func loadEnvVariables() {
 
 var (
 	key    = []byte("super-secret-key")
-	store  = newSessionStore()
+	store  = sessions.NewCookieStore(key)
 	router = http.NewServeMux()
 )
 
@@ -67,12 +67,6 @@ func redact(s string) string {
 		return "***"
 	}
 	return s[:8] + "..."
-}
-
-func newSessionStore() *sessions.FilesystemStore {
-	s := sessions.NewFilesystemStore("", key)
-	s.MaxLength(1 << 20)
-	return s
 }
 
 func signin(w http.ResponseWriter, r *http.Request) {
@@ -148,16 +142,16 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	session.Values["authenticated"] = true
 	session.Values["first_name"] = profile.Profile.FirstName
 	session.Values["last_name"] = profile.Profile.LastName
-	session.Values["raw_profile"], _ = json.MarshalIndent(profile, "", "    ")
 
 	if err := session.Save(r, w); err != nil {
 		log.Panic(err)
 	}
 
+	raw, _ := json.MarshalIndent(profile, "", "    ")
 	thisProfile := Profile{
-		FirstName:  session.Values["first_name"].(string),
-		LastName:   session.Values["last_name"].(string),
-		RawProfile: string(session.Values["raw_profile"].([]byte)),
+		FirstName:  profile.Profile.FirstName,
+		LastName:   profile.Profile.LastName,
+		RawProfile: string(raw),
 	}
 
 	if err := tmpl.Execute(w, thisProfile); err != nil {
@@ -170,9 +164,8 @@ func loggedin(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 
 	thisProfile := Profile{
-		FirstName:  session.Values["first_name"].(string),
-		LastName:   session.Values["last_name"].(string),
-		RawProfile: string(session.Values["raw_profile"].([]byte)),
+		FirstName: session.Values["first_name"].(string),
+		LastName:  session.Values["last_name"].(string),
 	}
 
 	if err := tmpl.Execute(w, thisProfile); err != nil {

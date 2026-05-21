@@ -31,7 +31,7 @@
         <div class="flex_column">
           <div class="flex width-941px space-between">
             <div>
-              <p>Profile Details</p>
+              <p>Logged in as {{.FirstName}} {{.LastName}}</p>
             </div>
             <div>
               <a href="/logout"
@@ -39,12 +39,14 @@
               >
             </div>
           </div>
+          {{if .RawProfile}}
           <div>
             <pre id="noborder" class="prettyprint noborder">
                         {{.RawProfile}}
                     </pre
             >
           </div>
+          {{end}}
         </div>
       </div>
     </div>
